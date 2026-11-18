@@ -1,11 +1,12 @@
 import React from "react";
+import { useVideoConfig } from "remotion";
 import { alpha, colors, fonts, radii, shadows } from "./theme";
 
 type Props = {
   url?: string;
   /** Tab title shown left of the address bar. */
   title?: string;
-  /** Window size in px. Defaults to a 1680x945 window centered on 1920x1080. */
+  /** Window size in px. Default 1680x945. */
   width?: number;
   height?: number;
   /** Absolute position of the window's top-left corner. Defaults to centered. */
@@ -87,8 +88,9 @@ export const BrowserShell: React.FC<Props> = ({
   reflection = 1,
   addressFocused = false,
 }) => {
-  const left = x ?? (1920 - width) / 2;
-  const top = y ?? (1080 - height) / 2;
+  const { width: compW, height: compH } = useVideoConfig();
+  const left = x ?? (compW - width) / 2;
+  const top = y ?? (compH - height) / 2;
   const [host, ...rest] = url.replace(/^https?:\/\//, "").split("/");
   const path = rest.length ? `/${rest.join("/")}` : "";
 
