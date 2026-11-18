@@ -145,90 +145,122 @@ const Spreadsheet: React.FC = () => {
 };
 
 const Dashboard: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const settle = spring({
+    frame: frame - CUT,
+    fps,
+    config: { damping: 200 },
+    durationInFrames: 90,
+  });
   const cards = [
     { label: "Income", value: 4200, accent: colors.text },
     { label: "Spent", value: 3217, accent: colors.text },
     { label: "Saved", value: 983, accent: colors.emerald },
   ];
   return (
-    <AbsoluteFill style={{ fontFamily: fonts.sans }}>
-      <div
+    <AbsoluteFill
+      style={{
+        fontFamily: fonts.sans,
+        perspective: 1600,
+        perspectiveOrigin: "50% 40%",
+      }}
+    >
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          top: 520,
-          left: 0,
-          right: 0,
-          textAlign: "center",
+          transformStyle: "preserve-3d",
+          transformOrigin: "50% 55%",
+          transform: `rotateX(${14 - 8 * settle}deg) rotateY(${-12 + 7 * settle}deg)`,
         }}
       >
         <div
           style={{
-            fontSize: 30,
-            color: colors.muted,
-            letterSpacing: 4,
-            fontFamily: fonts.mono,
+            position: "absolute",
+            top: 520,
+            left: 0,
+            right: 0,
+            textAlign: "center",
           }}
         >
-          JUNE BUDGET
-        </div>
-        <div
-          style={{
-            fontSize: 64,
-            fontWeight: 800,
-            color: colors.text,
-            marginTop: 8,
-          }}
-        >
-          All sorted.
-        </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 720,
-          left: 90,
-          width: 900,
-          display: "flex",
-          flexDirection: "column",
-          gap: 28,
-        }}
-      >
-        {cards.map((c) => (
           <div
-            key={c.label}
             style={{
-              height: 170,
-              borderRadius: 28,
-              backgroundColor: colors.surface,
-              border: `1.5px solid ${c.label === "Saved" ? alpha(colors.emerald, 0.6) : colors.border}`,
-              boxShadow:
-                c.label === "Saved"
-                  ? `0 0 60px ${alpha(colors.emerald, 0.25)}`
-                  : "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 48px",
+              fontSize: 30,
+              color: colors.muted,
+              letterSpacing: 4,
+              fontFamily: fonts.mono,
             }}
           >
-            <span
-              style={{ fontSize: 38, color: colors.muted, fontWeight: 500 }}
-            >
-              {c.label}
-            </span>
-            <span
-              style={{
-                fontSize: 68,
-                fontFamily: fonts.mono,
-                fontWeight: 700,
-                color: c.accent,
-              }}
-            >
-              {usd(c.value)}
-            </span>
+            JUNE BUDGET
           </div>
-        ))}
-      </div>
+          <div
+            style={{
+              fontSize: 64,
+              fontWeight: 800,
+              color: colors.text,
+              marginTop: 8,
+            }}
+          >
+            All sorted.
+          </div>
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 720,
+            left: 90,
+            width: 900,
+            display: "flex",
+            flexDirection: "column",
+            gap: 28,
+          }}
+        >
+          {cards.map((c, i) => {
+            const flip = spring({
+              frame: frame - CUT - 8 - i * 7,
+              fps,
+              config: { damping: 13, stiffness: 120, mass: 0.8 },
+            });
+            return (
+              <div
+                key={c.label}
+                style={{
+                  transform: `rotateX(${(1 - flip) * -80}deg) translateZ(${(1 - flip) * 120 + (c.label === "Saved" ? 40 : 0)}px)`,
+                  transformOrigin: "50% 0%",
+                  opacity: Math.min(1, flip * 1.4),
+                  height: 170,
+                  borderRadius: 28,
+                  backgroundColor: colors.surface,
+                  border: `1.5px solid ${c.label === "Saved" ? alpha(colors.emerald, 0.6) : colors.border}`,
+                  boxShadow:
+                    c.label === "Saved"
+                      ? `0 0 60px ${alpha(colors.emerald, 0.25)}`
+                      : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0 48px",
+                }}
+              >
+                <span
+                  style={{ fontSize: 38, color: colors.muted, fontWeight: 500 }}
+                >
+                  {c.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 68,
+                    fontFamily: fonts.mono,
+                    fontWeight: 700,
+                    color: c.accent,
+                  }}
+                >
+                  {usd(c.value)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };
@@ -261,8 +293,21 @@ export const Hook: React.FC = () => {
         tilt={false}
       >
         {/* Messy sheet: visible right of the wipe */}
-        <AbsoluteFill style={{ clipPath: `inset(0 0 0 ${Math.max(0, cx)}px)` }}>
-          <Spreadsheet />
+        <AbsoluteFill
+          style={{
+            clipPath: `inset(0 0 0 ${Math.max(0, cx)}px)`,
+            perspective: 1700,
+            perspectiveOrigin: "50% 35%",
+          }}
+        >
+          <AbsoluteFill
+            style={{
+              transformOrigin: "50% 60%",
+              transform: `rotateX(${18 - Math.min(frame, CUT) * 0.04}deg) rotateY(${-9 + Math.min(frame, CUT) * 0.05}deg) rotateZ(-1.5deg) translateZ(${Math.min(frame, CUT) * 0.25}px)`,
+            }}
+          >
+            <Spreadsheet />
+          </AbsoluteFill>
         </AbsoluteFill>
         {/* Clean dashboard: revealed left of the wipe */}
         {frame >= CUT ? (
@@ -318,8 +363,15 @@ export const Hook: React.FC = () => {
             letterSpacing: -3,
             color: colors.alert,
             opacity: Math.min(1, snap * 1.5) * flicker,
-            transform: `scale(${1.35 - 0.35 * snap})`,
-            textShadow: `0 0 40px ${alpha(colors.alert, 0.7)}, 0 0 90px ${alpha(colors.alert, 0.4)}`,
+            transform: `perspective(1100px) rotateX(${(1 - snap) * 55 + 10}deg) translateZ(${(1 - snap) * 260}px)`,
+            transformOrigin: "50% 100%",
+            textShadow: [1, 2, 3, 4, 5, 6, 7, 8]
+              .map((d) => `0 ${d}px 0 ${d < 8 ? "#7F1D1D" : "#450A0A"}`)
+              .concat([
+                `0 14px 24px rgba(0,0,0,0.6)`,
+                `0 0 50px ${alpha(colors.alert, 0.6)}`,
+              ])
+              .join(", "),
           }}
         >
           MANUAL BUDGETING IS BROKEN.

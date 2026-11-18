@@ -85,6 +85,18 @@ const Panel: React.FC<{
   enterFrom: number;
 }> = ({ x, w, title, icon, children, enterFrom }) => {
   const frame = useCurrentFrame();
+  // Open-book 2.5D: panels angle toward the split, swing in, then flatten for the close-ups.
+  const side = enterFrom < 0 ? 1 : -1;
+  const swing = spring({
+    frame,
+    fps: 60,
+    config: { damping: 14, stiffness: 70, mass: 1 },
+  });
+  const open = interpolate(frame, [230, 290], [1, 0], {
+    ...clamp,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const angle = -side * ((1 - swing) * 55 + 18 * open);
   const { fps } = useVideoConfig();
   const s = spring({
     frame,
@@ -106,8 +118,9 @@ const Panel: React.FC<{
         overflow: "hidden",
         fontFamily: fonts.sans,
         color: colors.text,
-        transform: `translateX(${(1 - s) * enterFrom}px)`,
-        boxShadow: "0 30px 70px -30px rgba(0,0,0,0.8)",
+        transform: `perspective(1500px) translateX(${(1 - s) * enterFrom}px) rotateY(${angle}deg) rotateX(${6 * open}deg) translateZ(${-60 * open}px)`,
+        transformOrigin: side > 0 ? "100% 50%" : "0% 50%",
+        boxShadow: `${side * -30 * open}px ${30 + 30 * open}px 80px -30px rgba(0,0,0,0.85)`,
       }}
     >
       <div
@@ -298,7 +311,7 @@ const SheetSide: React.FC = () => {
         {card > 0.02 ? (
           <div
             style={{
-              transform: `scale(${0.6 + 0.4 * card})`,
+              transform: `perspective(700px) rotateX(${(1 - card) * -60}deg) translateZ(${(1 - card) * 120}px) scale(${0.6 + 0.4 * card})`,
               transformOrigin: "0 50%",
               opacity: Math.min(1, card * 1.5),
             }}

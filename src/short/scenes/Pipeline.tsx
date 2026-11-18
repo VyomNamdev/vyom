@@ -51,7 +51,8 @@ const StepCard: React.FC<{
         opacity:
           Math.min(1, enter) *
           (0.45 + 0.55 * Math.max(lit, frame < on ? 0.4 : 1)),
-        transform: `translateY(${(1 - enter) * 60}px) scale(${1 + 0.03 * Math.sin(lit * Math.PI)})`,
+        transform: `translateY(${(1 - enter) * 60}px) rotateX(${(1 - enter) * -85}deg) translateZ(${lit * 70 + pulse * 14}px) scale(${1 + 0.03 * Math.sin(lit * Math.PI)})`,
+        transformOrigin: "50% 0%",
       }}
     >
       <div
@@ -154,11 +155,30 @@ export const Pipeline: React.FC = () => {
           size={86}
           top={250}
         />
-        {STEPS.map((s, i) => (
-          <StepCard key={s.title} i={i} {...s} />
-        ))}
-        <Connector i={0} fireAt={STEPS[1].on} />
-        <Connector i={1} fireAt={STEPS[2].on} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            perspective: 1700,
+            perspectiveOrigin: "50% 45%",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              transformStyle: "preserve-3d",
+              transformOrigin: "50% 55%",
+              transform: `rotateX(${20 - 6 * Math.min(1, frame / 600)}deg) rotateY(${-14 + Math.sin(frame / 90) * 6}deg) rotateZ(-2deg)`,
+            }}
+          >
+            {STEPS.map((s, i) => (
+              <StepCard key={s.title} i={i} {...s} />
+            ))}
+            <Connector i={0} fireAt={STEPS[1].on} />
+            <Connector i={1} fireAt={STEPS[2].on} />
+          </div>
+        </div>
       </div>
       {/* Glowing corner badge */}
       <div

@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
-import { ReelBackground } from "../reel/ui";
+import { DepthBackground } from "./DepthBackground";
 import { Captions } from "./Captions";
 import { SCENES } from "./config";
 import { EndScreen } from "./scenes/EndScreen";
@@ -32,7 +32,7 @@ const parts: {
 
 export const AutomatedBudgetShort: React.FC = () => (
   <AbsoluteFill>
-    <ReelBackground />
+    <DepthBackground />
     {parts.map(({ key, C, enter, exit }) => {
       const { from, duration } = SCENES[key];
       const lead = enter === "up" || enter === "left" ? TRANSITION : 0;

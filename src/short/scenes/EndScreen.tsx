@@ -152,7 +152,8 @@ export const EndScreen: React.FC = () => {
           width: CARD.w,
           fontFamily: fonts.sans,
           opacity: Math.min(1, card),
-          transform: `translateY(${(1 - card) * 400}px) scale(${0.9 + 0.1 * card})`,
+          transform: `perspective(1600px) translateY(${(1 - card) * 400 + Math.sin(frame / 34) * 10}px) rotateX(${(1 - card) * 40 + 7 + Math.sin(frame / 47) * 3}deg) rotateY(${-9 + Math.sin(frame / 60) * 6}deg) translateZ(${(1 - card) * -300}px)`,
+          transformOrigin: "50% 60%",
         }}
       >
         <div
@@ -196,7 +197,7 @@ export const EndScreen: React.FC = () => {
           display: "flex",
           justifyContent: "center",
           opacity: Math.min(1, sub) * 0.9,
-          transform: `scale(${0.7 + 0.3 * sub})`,
+          transform: `perspective(900px) rotateX(${(1 - sub) * 70}deg) scale(${0.7 + 0.3 * sub})`,
         }}
       >
         <div

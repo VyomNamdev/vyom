@@ -103,6 +103,12 @@ export const Statement: React.FC = () => {
   const caret = !submitted && frame > 350 && Math.floor(frame / 16) % 2 === 0;
   const flash = interpolate(frame, [SUBMIT, SUBMIT + 20], [1, 0], clamp);
 
+  // 2.5D: tilted while the statement scrolls, flattens for the zoom onto the prompt.
+  const tilt = interpolate(frame, [300, 400], [1, 0], {
+    ...clamp,
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const drift = Math.sin(frame / 50);
   let bal = 3240;
   let tagIdx = 0;
 
@@ -124,6 +130,9 @@ export const Statement: React.FC = () => {
             top: BAR.y,
             width: BAR.w,
             minHeight: 110,
+            zIndex: 2,
+            transform: `perspective(1600px) rotateX(${tilt * (14 + drift * 2)}deg) rotateY(${tilt * -6}deg) translateY(${tilt * -10}px) translateZ(${tilt * 50}px)`,
+            transformOrigin: "50% 100%",
             padding: "28px 100px 28px 82px",
             borderRadius: 26,
             backgroundColor: colors.surface,
@@ -190,6 +199,9 @@ export const Statement: React.FC = () => {
             top: 520,
             width: 1000,
             height: 860,
+            transform: `perspective(2000px) rotateX(${tilt * (16 + drift * 1.5)}deg) rotateY(${tilt * (-8 + drift * 2)}deg) rotateZ(${tilt * -1}deg)`,
+            transformOrigin: "50% 30%",
+            boxShadow: `0 ${40 * tilt + 20}px ${90 * tilt + 40}px -30px rgba(0,0,0,0.85)`,
             borderRadius: 22,
             backgroundColor: colors.surface,
             border: `1px solid ${colors.border}`,
