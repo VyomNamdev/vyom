@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Mirrors src/components/theme.ts so Tailwind utilities share the same tokens. */
+@theme {
+  --color-canvas: #0b1120;
+  --color-surface: #111827;
+  --color-border: #1e293b;
+  --color-emerald: #10b981;
+  --color-alert: #ef4444;
+  --color-text: #f8fafc;
+  --color-muted: #94a3b8;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
