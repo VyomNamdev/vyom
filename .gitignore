@@ -2,3 +2,7 @@ channels/playbook/*.pdf
 channels/playbook/*.txt
 .cache/
 __pycache__/
+# regenerable render inputs (tools/sprites.py, tools/bank.py)
+channels/*/episodes/*/sprites/
+channels/*/episodes/*/layers/*.png
+channels/*/episodes/*/audio/mix_raw.wav

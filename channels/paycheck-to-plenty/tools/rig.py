@@ -10,7 +10,7 @@ tall (about 6 ft). Profile views are drawn facing LEFT; use facing=+1 to mirror.
 from math import sin, cos, radians
 import random
 
-OUT, SW = "#3B2C25", 3.6
+OUT, SW = "#3B2C25", 2.6
 
 _n = [0]
 
@@ -438,6 +438,16 @@ def head_profile(L, ex_name="neutral", m=0.0, blink=0.0):
              "C 60,184 48,180 44,170 C 46,130 40,100 30,74 C 20,60 4,50 -10,48 C -30,46 -44,52 -54,58 Z")
         o.append(P(d, L["hair"]))
         o.append(clipped(d, P("M 30,-60 C 80,-20 96,60 80,230 L 120,230 L 120,-60 Z", L["hair_sh"], stroke=None)))
+    if st in ("bun", "short", "curly", "cap"):
+        d = ("M -54,58 C -62,14 -30,-30 14,-32 C 56,-34 80,-4 76,44 C 74,70 66,90 56,104 "
+             "C 50,88 44,74 34,62 C 20,52 4,46 -10,46 C -30,44 -44,50 -54,58 Z")
+        if st == "bun":
+            o.append(E(70, 20, 26, 24, L["hair"]))
+        o.append(P(d, L["hair"]))
+        o.append(clipped(d, P("M 30,-60 C 80,-20 96,60 80,160 L 120,160 L 120,-60 Z", L["hair_sh"], stroke=None)))
+        o.append(P("M -40,6 C -24,-16 4,-24 34,-22", stroke=L["hair_hi"], sw=3))
+        if st == "cap":
+            o.append(P("M -58,30 C -56,-20 40,-30 70,10 L 72,30 Z", "#2B3A55") + P("M -58,30 L -96,40 L -60,44 Z", "#1F2B41"))
     o.append(P("M -52,62 Q -44,54 -30,58 Q -42,59 -52,64 Z", L["brow"], stroke=L["brow"], sw=2))
     ey = "M -52,80 Q -44,74 -34,79 Q -40,90 -50,88 Z"
     if blink >= 0.9:
@@ -632,7 +642,7 @@ def character_profile(L, pose=None, ex="neutral", m=0.0, blink=0.0, x=0, y=0, sc
     o.append(legs(L, [(6, 576), (-4, 576)], p["legs"],
                   "M -66,520 C -68,560 -62,590 -46,620 L 42,620 C 54,590 56,560 52,520 Z", view="side", far_dark=True))
     o.append(P("M -28,140 L -30,200 L 34,200 L 34,128 Z", L["skin"]) )
-    o.append(torso_profile(L))
+    o.append(f'<g transform="translate(-6,0) scale(1.3,1)">{torso_profile(L)}</g>')
     o.append(arm(L, -4, 240, p["au"], p["af"], p["ah"], -1, p["hand"], p["held"]))
     o.append(f'<g transform="translate(0,{p["bob"]})">{head_profile(L, ex, m, blink)}</g>')
     sx = k * (-facing if facing == 1 else 1)
