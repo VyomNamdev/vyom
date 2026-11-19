@@ -1,0 +1,12 @@
+#+title: EP01 How Taxes Actually Work, Part 1 (demo)
+* DONE Script + hook (playbook D3 rules, D4 scorecard 10/10) :script:
+  assets/script.json, 14 lines, ~2:04, sources listed
+* DONE AI voice (Kokoro am_michael, local), lip-sync envelope, SFX, music :sound:
+  assets/build_audio.py -> assets/audio/*, components/timeline.gen.ts
+* DONE Adult Sam rig: expressions, gestures, walk, lip sync :character:
+  components/Sam.tsx
+* DONE Set + board graphics + tax meter, 14 beats :picture:
+  components/Room.tsx, components/Icons.tsx, compositions/ep01-taxes.tsx
+* TODO Owner review of the demo cut :gate:
+* TODO Word-level timings (forced alignment) to replace character-share cues :polish:
+* TODO Part 2: what really happens if you don't pay :next:

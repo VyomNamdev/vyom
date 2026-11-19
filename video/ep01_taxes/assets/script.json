@@ -1,0 +1,37 @@
+{
+  "episode": "EP01 - How Taxes Actually Work (Explained Simply) - Part 1",
+  "title_option": "How Taxes Actually Work (Explained Simply)",
+  "voice": {"engine": "kokoro-onnx v1.0", "voice": "am_michael", "speed": 1.08},
+  "hook_check": {
+    "playbook_section": "D3 finance hook rules + D4 hook scorecard + Hook bank 'Nobody-taught-you'",
+    "first_sentence_about_viewers_money": true,
+    "dollar_number_by_15s": "$788 in the first sentence, $50,000 / $4,166 by ~15s",
+    "hook_words": 33,
+    "scorecard": {"stakes": 2, "specificity": 2, "speed": 2, "curiosity_gap": 2, "truth_and_match": 2, "total": "10/10"}
+  },
+  "lines": [
+    {"id": "hook", "pause_after": 0.45, "text": "Your first real paycheck will be almost eight hundred dollars smaller than you think. School taught you photosynthesis, but never this. So, little bro, let me show you where that money goes."},
+    {"id": "define", "pause_after": 0.4, "text": "Taxes are money you pay to the government, out of what you earn, and what you buy. Quick note: this is education, not personal financial advice."},
+    {"id": "salary", "pause_after": 0.35, "text": "Say you land a job paying fifty thousand dollars a year. That's about four thousand, one hundred sixty-six dollars a month. Now watch what happens."},
+    {"id": "deductions", "pause_after": 0.35, "text": "Federal income tax takes about three hundred thirty. Social Security, two fifty-eight. Medicare, sixty. And your state grabs around one forty."},
+    {"id": "takehome", "pause_after": 0.5, "text": "So out of four thousand, one sixty-six, you actually take home about three thousand, three hundred seventy-eight. Seven hundred eighty-eight dollars, gone. Every single month."},
+    {"id": "salestax", "pause_after": 0.45, "text": "And it's not just your paycheck. Buy a twenty-dollar hoodie with eight percent sales tax, and you pay twenty-one sixty at the register."},
+    {"id": "why", "pause_after": 0.5, "text": "Now you're probably thinking: why would anyone agree to this?"},
+    {"id": "services", "pause_after": 0.35, "text": "Because that money builds the stuff you use every single day. The roads you drive on. Your school. Firefighters, hospitals, parks, even the clean water from your tap."},
+    {"id": "pool", "pause_after": 0.4, "text": "Nobody can afford a fire truck or a highway alone. So millions of people chip in a little, and together, it adds up to nearly five trillion dollars a year in federal taxes."},
+    {"id": "group", "pause_after": 0.5, "text": "Think of it like a group project, where everyone pays their share so the whole country actually works."},
+    {"id": "lifetime", "pause_after": 0.6, "text": "Now here's the part that'll shock you. At this pace, over a forty-year career, you'd pay around three hundred seventy-eight thousand dollars in taxes."},
+    {"id": "twist", "pause_after": 0.6, "text": "Which brings up the real question. What happens if you just... don't pay?"},
+    {"id": "penalty", "pause_after": 0.5, "text": "Say you skip a one-thousand-dollar tax bill. Penalties start stacking. Interest kicks in. And every month, that number keeps climbing."},
+    {"id": "cliff", "pause_after": 1.2, "text": "And trust me, the penalties aren't even the scariest part. That's what I'll show you in part two."}
+  ],
+  "sources": [
+    "Federal income tax: 2025 single filer, $15,000 standard deduction, 10%/12% brackets on $35,000 taxable = $3,961/yr = ~$330/mo (IRS Rev. Proc. 2024-40)",
+    "Social Security 6.2% and Medicare 1.45% employee FICA rates (IRS Topic 751)",
+    "State income tax ~$140/mo is an illustrative example; varies by state (some states have none)",
+    "Sales tax 8% is an example rate; varies by state and city",
+    "Federal receipts ~ $4.9 trillion in FY2024 (U.S. Treasury / CBO)",
+    "Lifetime: $788/mo x 12 x 40 = $378,240 (no raises, illustration only)",
+    "Penalty demo: failure-to-file 5%/mo (max 25%, reduced by failure-to-pay), failure-to-pay 0.5%/mo, underpayment interest ~7%/yr (IRS) -> about $1,355 after 12 months; estimate"
+  ]
+}

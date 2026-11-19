@@ -1,22 +1,22 @@
 {
   "meta": {
     "channel": "Fine Print Money (AI & Wealth)",
-    "bible_version": "1.0.0",
+    "bible_version": "1.1.0",
     "purpose": "Single source of truth for every character, outfit, prop and background rule. Every image prompt must be built from this file so the look never drifts.",
     "reference_image_rule": "ALWAYS attach the character/style reference image (Sam turnaround sheet + one approved scene still) to EVERY generation. Text alone is not enough to lock the look.",
-    "how_to_extend": "Add new characters under `characters` using the exact same keys. Never edit `global_art_style` per-scene; scene-level variation lives only in the scene spec."
+    "how_to_extend": "Add new characters under `characters` using the exact same keys. Never edit `global_art_style` per-scene; scene-level variation lives only in the scene spec.",
+    "changelog": [
+      "1.1.0: per owner direction, faces now have white eyes with black pupils and a small simple nose; added the adult Sam variant (late 20s) used in EP01."
+    ]
   },
-
   "global_art_style": {
     "style_summary": "Hand-inked 2D editorial cartoon illustration: minimalist stick-limb characters with large cream-white rounded heads and simple flat-colored outfits, placed inside richly detailed, semi-realistic, warm vintage illustrated environments. Looks like a premium animated history/finance explainer still frame.",
-
     "line_work": {
       "character_outline": "Bold, uniform, clean black ink outline around head, outfit, hat and hands (approx. 6-8 px at 1920x1080). Smooth vector-like curves, no sketchy double lines.",
       "stick_limbs": "Arms and legs are single solid black lines of the same thick weight as the outline (approx. 6-8 px), slightly curved, no muscles, no elbows/knees drawn, no thickness taper.",
       "background_lines": "Thinner dark-brown/sepia ink lines (approx. 2-4 px) with subtle crosshatching and light texture in shadows. Backgrounds always have visibly thinner lines than characters so characters pop.",
       "line_color": "Near-black (#1A1612) for characters; dark sepia brown (#3B2A1C) for environments."
     },
-
     "color_palette": {
       "base_tones": {
         "cream_skin_head": "#F7F3EA",
@@ -43,16 +43,14 @@
         "No neon, no cyberpunk, no saturated rainbow palettes, no cold blue-dominant grading (except a deliberate 'modern' panel in a split-screen, which uses clean off-white #FAFAF7)."
       ]
     },
-
     "shading_rules": [
       "Characters: flat color fills only. Faces have ZERO shading, zero blush, zero gradients. Outfits may have one very subtle flat shadow tone at most.",
       "Backgrounds: soft warm ambient lighting, gentle gradients from lamp/window light, light ink crosshatching in corners and under furniture, soft cast shadow ellipse under each character's feet.",
       "Light sources are motivated and visible where possible: oil lamp, table lamp, hanging pendant lamps, tall windows with warm daylight."
     ],
-
     "character_anatomy_rules": {
       "proportions": "Head is very large: roughly 1/3 of total character height. Body/torso is a simple outfit shape (vest, dress, suit jacket) roughly the same height as the head. Legs are stick lines making up the remaining third.",
-      "head": "Smooth, slightly wide rounded oval/circle, flat cream-white (#F7F3EA), bold black outline. No ears unless hidden under hair/hat; no nose; no neck (or a tiny implied neck hidden by collar).",
+      "head": "Smooth, slightly wide rounded oval, flat cream-white (#F7F3EA), bold black outline. Small cream ears at the sides (may hide under hair or a hat). Small stroke nose. Short neck hidden by the collar.",
       "torso": "Clean outfit block with flat colors and bold outline; collar visible where specified. No chest/abdomen anatomy, no shoulders muscles.",
       "arms": "Single thick black stick lines emerging from the outfit's shoulders, smooth bends, no elbows.",
       "hands": "Rounded white (or black, if specified for a character) mitten/glove hands with a bold outline: 3-4 stubby rounded fingers suggested, thumb clearly separate. Hands are slightly oversized relative to stick arms.",
@@ -60,14 +58,13 @@
       "feet": "Simple dark charcoal (#2B2826) rounded oval/bean shoes with bold outline, no laces, no soles detail.",
       "pose_language": "Clear, readable silhouettes; strong gesture lines (pointing, presenting, crossed arms, clapping, stamping). Limbs never tangled or hidden."
     },
-
     "facial_expression_rules": {
-      "eyes": "Two solid black dots or small solid black ovals. For 'shocked/awestruck' use small white circles with black outline and a tiny pupil or sparkle star. Never realistic irises, eyelashes or eyelids (except a single heavy lid line for 'skeptical/annoyed').",
+      "eyes": "White oval eyes with a bold black outline, a solid black pupil and a tiny white highlight. Upper-lid line drops over the eye for smug/skeptical/serious. Shocked: bigger eyes, smaller pupils. Blink = a short curved line.",
       "eyebrows": "Thick, short, solid black strokes doing ~80% of the acting: angled down-in for smug/determined/annoyed, raised high and curved for surprised, tilted up-in for worried.",
       "mouth": "Single clean black line or simple open shape: wide grin with a white teeth band for happy, one-sided smirk for smug, small 'o' for shocked, flat/wavy line for worried/serious, downturned short line for annoyed.",
-      "forbidden": "No nose, no cheeks shading, no wrinkles, no lips, no detailed teeth, no realistic skin, no blush stickers, no anime sparkle eyes (except a tiny star sparkle in 'awestruck')."
+      "forbidden": "No realistic noses (only the small stroke nose), no cheek shading, no wrinkles, no lips, no detailed teeth (a flat white band is fine), no realistic skin, no blush stickers, no anime sparkle eyes.",
+      "nose": "Small, clean single-stroke nose: a short curved hook just below and between the eyes. No nostrils, no shading."
     },
-
     "background_rules": [
       "Environments are richly detailed, semi-realistic 2D illustrations: wood paneling, wallpaper patterns, plank floors, period furniture, ticker tape machines, rotary/candlestick telephones, oil lamps, chalkboards, framed photos, rugs, tall multi-pane windows with soft city silhouettes.",
       "Era default: 1920s-1940s American small town / early Wall Street, unless a scene explicitly says 'modern'.",
@@ -76,7 +73,6 @@
       "All in-image text (signs, chalkboards, price boards, certificates, tags) must be short, legible, correctly spelled, in clean serif or hand-chalk lettering. Only render the exact text given in the scene spec; anything else is unreadable squiggle lines.",
       "Leave 10-15% safe margin around the action so the editor can zoom/pan (Ken Burns) without cropping heads or key text."
     ],
-
     "framing_and_output": {
       "aspect_ratio": "16:9",
       "recommended_resolution": "1920x1080 (or 2560x1440 for zoom headroom)",
@@ -90,17 +86,35 @@
         "split_screen": "Two equal vertical panels separated by a clean thick black divider line; each panel a complete composition."
       }
     },
-
     "negative_prompt": [
-      "NO 3D render", "NO CGI", "NO Pixar or Disney style", "NO anime or manga", "NO chibi",
-      "NO muscular or realistic human bodies", "NO realistic anatomy", "NO realistic skin textures", "NO noses", "NO detailed lips or teeth",
-      "NO photorealism on characters", "NO gradients or shading on faces",
-      "NO extra fingers", "NO thick tube limbs", "NO elbows or knees drawn",
-      "NO YouTube UI", "NO player bars", "NO progress bar", "NO picture-in-picture or thumbnail inset in the corner", "NO watermarks", "NO logos", "NO subtitles or captions", "NO letterbox black bars",
-      "NO neon or cyberpunk palette", "NO random gibberish text where readable text was requested", "NO misspelled signs",
-      "NO extra characters beyond those specified (except an explicitly requested background crowd)"
+      "NO 3D render",
+      "NO CGI",
+      "NO Pixar or Disney style",
+      "NO anime or manga",
+      "NO chibi",
+      "NO muscular or realistic human bodies",
+      "NO realistic anatomy",
+      "NO realistic skin textures",
+      "NO detailed lips or teeth",
+      "NO photorealism on characters",
+      "NO gradients or shading on faces",
+      "NO extra fingers",
+      "NO thick tube limbs",
+      "NO elbows or knees drawn",
+      "NO YouTube UI",
+      "NO player bars",
+      "NO progress bar",
+      "NO picture-in-picture or thumbnail inset in the corner",
+      "NO watermarks",
+      "NO logos",
+      "NO subtitles or captions",
+      "NO letterbox black bars",
+      "NO neon or cyberpunk palette",
+      "NO random gibberish text where readable text was requested",
+      "NO misspelled signs",
+      "NO extra characters beyond those specified (except an explicitly requested background crowd)",
+      "NO realistic or large noses"
     ],
-
     "anti_drift_rules": [
       "Character heads must remain flat cream-white with black outline in every shot.",
       "Limbs are ALWAYS single thick black stick lines; if a generation gives fleshy arms or legs, reject it.",
@@ -109,13 +123,12 @@
       "If the model drifts, re-generate with the reference image attached and the full negative prompt; do not 'fix' with new style words."
     ]
   },
-
   "characters": {
     "sam": {
       "display_name": "Sam",
       "role": "Main character / hero. A sharp, ambitious young kid (approx. 11-13 years old in look) learning money the hard way in a vintage 1920s-1940s world. Narrator's avatar for every lesson.",
       "head_shape": "Large smooth rounded oval, slightly wider than tall, flat cream-white #F7F3EA with bold black outline. Visible brown hair tufts only at the forehead fringe and above each ear beneath the cap.",
-      "face_style": "Two solid black dot eyes set mid-face and fairly wide apart, thick short black eyebrows, single-line mouth. No nose, no ears visible, no blush.",
+      "face_style": "White oval eyes with black pupils and a tiny highlight, set wide apart; thick short black eyebrows; a small single-stroke nose; a clean mouth that opens to a dark interior with a white teeth band when happy. No blush, no freckles.",
       "hair_or_hat": "Charcoal-gray/brown newsboy (flat) cap #4A4440 with a small round button on top, soft puffy crown, short curved brim pointing forward, bold outline. Short medium-brown hair #7A4E2D peeking out as 3-4 pointed bangs on the forehead and small tufts at the sides. The cap is NEVER removed.",
       "torso_outfit": "Muted olive-green knit sweater vest #6E7A45 (V-neck) over a white collared shirt with a crisp pointed collar visible at the neck; white shirt sleeves are NOT shown (arms are stick lines from the vest armholes). Short medium-brown shorts #6B5136 ending just above the knees.",
       "limb_style": "Single thick black stick arms and legs, smooth curves, no elbows/knees, same weight as outline.",
@@ -127,8 +140,14 @@
         "Stacks of coins, stock certificates, paper bills (scene-dependent)"
       ],
       "color_lock": {
-        "cap": "#4A4440", "hair": "#7A4E2D", "vest": "#6E7A45", "shirt_collar": "#FFFFFF",
-        "shorts": "#6B5136", "satchel": "#C9B48C", "shoes": "#2B2826", "hands": "#FFFFFF"
+        "cap": "#4A4440",
+        "hair": "#7A4E2D",
+        "vest": "#6E7A45",
+        "shirt_collar": "#FFFFFF",
+        "shorts": "#6B5136",
+        "satchel": "#C9B48C",
+        "shoes": "#2B2826",
+        "hands": "#FFFFFF"
       },
       "allowed_expressions": {
         "happy": "Eyebrows relaxed and slightly raised, wide open grin with a white upper-teeth band, eyes solid dots.",
@@ -139,11 +158,56 @@
         "serious_determined": "Eyebrows flat and slightly lowered, mouth a short straight line, dot eyes looking directly forward."
       },
       "do_not": [
-        "Do not remove the cap", "Do not change the vest color", "Do not give him long pants",
-        "Do not drop the satchel", "Do not age him into a teen/adult body", "Do not add a nose or freckles"
+        "Do not remove the cap",
+        "Do not change the vest color",
+        "Do not give him long pants",
+        "Do not drop the satchel",
+        "Do not age him into a teen/adult body",
+        "Do not add freckles or a realistic nose"
       ]
     },
-
+    "sam_adult": {
+      "display_name": "Sam (adult, late 20s)",
+      "role": "Main character as a young adult (late 20s): the big brother who explains money to his 15-16 year old little brother (the viewer). Used from EP01 on.",
+      "head_shape": "Large smooth rounded oval, slightly wider than tall, flat cream-white #F7F3EA with bold black outline; about 1/3.5 of total height (adult proportions: taller torso and legs than kid Sam). Small cream ears at the sides.",
+      "face_style": "White oval eyes with black pupils and a tiny highlight, set wide apart; thick short black eyebrows; a small single-stroke nose; a clean mouth that opens to a dark interior with a white teeth band when happy. No blush, no freckles.",
+      "hair_or_hat": "Charcoal-gray/brown newsboy (flat) cap #4A4440 with a small round button on top, soft puffy crown, short curved brim pointing forward, bold outline. Short medium-brown hair #7A4E2D peeking out as 3-4 pointed bangs on the forehead and small tufts at the sides. The cap is NEVER removed.",
+      "torso_outfit": "Same muted olive-green V-neck knit sweater vest #6E7A45 over a white shirt with crisp pointed collar; long medium-brown trousers #6B5136 with a dark belt and small brass buckle. Trousers cover the thighs as flat thick shapes; the lower legs continue as single black stick lines.",
+      "limb_style": "Single thick black stick arms and legs, smooth curves, no elbows/knees, same weight as outline.",
+      "hands_and_feet": "White rounded mitten hands with bold black outline and a separated thumb. Dark charcoal rounded bean-shaped shoes.",
+      "signature_props": [
+        "Beige/khaki canvas messenger satchel #C9B48C worn cross-body: strap from his right shoulder to the bag on his left hip (ALWAYS present)",
+        "Pointing finger mitten for explaining at the chalkboard",
+        "Chalkboard, paychecks, receipts, tax bills (scene-dependent)"
+      ],
+      "color_lock": {
+        "cap": "#4A4440",
+        "hair": "#7A4E2D",
+        "vest": "#6E7A45",
+        "shirt_collar": "#FFFFFF",
+        "satchel": "#C9B48C",
+        "shoes": "#2B2826",
+        "hands": "#FFFFFF",
+        "trousers": "#6B5136"
+      },
+      "allowed_expressions": {
+        "happy": "Eyebrows relaxed and slightly raised, wide open grin with a white upper-teeth band, eyes solid dots.",
+        "smug_confident": "Eyebrows angled sharply down toward the center, one-sided smirk curling up on one side, dot eyes. His signature look.",
+        "shocked_surprised": "Eyebrows raised high and arched, eyes become small white circles with black outline and tiny pupils (or star sparkles for awe), small round 'o' mouth.",
+        "confused_skeptical": "One eyebrow raised, the other flat/lowered, mouth a short slanted line pushed to one side.",
+        "worried_stressed": "Eyebrows tilted up toward the center, wavy thin mouth line, optional single small sweat drop beside the head.",
+        "serious_determined": "Eyebrows flat and slightly lowered, mouth a short straight line, dot eyes looking directly forward.",
+        "neutral": "Relaxed brows, eyes open with a slight lid, small friendly closed smile."
+      },
+      "do_not": [
+        "Do not remove the cap",
+        "Do not change the vest color",
+        "Do not give him shorts (adult wears long trousers)",
+        "Do not drop the satchel",
+        "Do not add a beard or stubble",
+        "Do not add freckles or a realistic nose"
+      ]
+    },
     "lena": {
       "display_name": "Lena (Sam's skeptical sister)",
       "role": "Skeptical family member. Voice of doubt — 'that's a waste of money' — the person Sam has to prove wrong.",
@@ -153,8 +217,17 @@
       "torso_outfit": "Knee-length A-line dress in warm tan #CDB287 with a small darker brown floral/damask repeating pattern, white rounded Peter Pan collar, small dark buttons down the front placket, short puffed sleeves.",
       "limb_style": "Single thick black stick arms and legs, smooth, no elbows/knees.",
       "hands_and_feet": "White rounded mitten hands. Dark charcoal rounded bean shoes.",
-      "signature_props": ["Arms crossed tightly as default pose", "Occasionally a small coin jar or a newspaper"],
-      "color_lock": { "hair": "#7A4E2D", "dress": "#CDB287", "dress_pattern": "#8A6A45", "collar": "#FFFFFF", "shoes": "#2B2826" },
+      "signature_props": [
+        "Arms crossed tightly as default pose",
+        "Occasionally a small coin jar or a newspaper"
+      ],
+      "color_lock": {
+        "hair": "#7A4E2D",
+        "dress": "#CDB287",
+        "dress_pattern": "#8A6A45",
+        "collar": "#FFFFFF",
+        "shoes": "#2B2826"
+      },
       "allowed_expressions": {
         "annoyed_skeptical": "Eyebrows angled sharply down and in, heavy upper-lid line over dot eyes, short downturned mouth. Default.",
         "unimpressed": "Flat eyebrows, half-lidded eyes, flat straight mouth.",
@@ -162,9 +235,13 @@
         "grudging_smile": "One eyebrow still lowered, small reluctant smile on one side.",
         "worried": "Eyebrows tilted up toward center, wavy mouth."
       },
-      "do_not": ["No makeup", "No adult proportions", "Do not change dress pattern or color", "Do not unbraid the hair"]
+      "do_not": [
+        "No makeup",
+        "No adult proportions",
+        "Do not change dress pattern or color",
+        "Do not unbraid the hair"
+      ]
     },
-
     "mr_hale_shopkeeper": {
       "display_name": "Mr. Hale (shopkeeper)",
       "role": "Kind but shrewd general-store / grocery shopkeeper who sells to Sam and occasionally buys from him.",
@@ -174,17 +251,31 @@
       "torso_outfit": "White long-sleeve-implied shirt with dark-gray sleeve garters, a muted brown waistcoat #6B5136, and a long cream-white apron #F2EBDD tied at the waist covering down to the knees. Dark brown trousers.",
       "limb_style": "Single thick black stick arms and legs (legs mostly hidden by apron and counter).",
       "hands_and_feet": "White rounded mitten hands. Dark charcoal bean shoes.",
-      "signature_props": ["Brass cash register", "Paper sacks of goods", "Small hanging scale", "Pencil tucked behind the ear", "Glass candy jars on the counter"],
-      "color_lock": { "waistcoat": "#6B5136", "apron": "#F2EBDD", "mustache": "#6D6D6D", "trousers": "#4E3420" },
+      "signature_props": [
+        "Brass cash register",
+        "Paper sacks of goods",
+        "Small hanging scale",
+        "Pencil tucked behind the ear",
+        "Glass candy jars on the counter"
+      ],
+      "color_lock": {
+        "waistcoat": "#6B5136",
+        "apron": "#F2EBDD",
+        "mustache": "#6D6D6D",
+        "trousers": "#4E3420"
+      },
       "allowed_expressions": {
         "friendly": "Relaxed eyebrows, smile curving under the mustache.",
         "shrewd": "One eyebrow lowered, small knowing smile.",
         "surprised": "Eyebrows up, white circle eyes, 'o' mouth under mustache.",
         "doubtful": "Eyebrows pinched, mouth flat under mustache."
       },
-      "do_not": ["No beard", "Do not remove the apron", "No modern clothing"]
+      "do_not": [
+        "No beard",
+        "Do not remove the apron",
+        "No modern clothing"
+      ]
     },
-
     "mr_vance_mentor": {
       "display_name": "Mr. Vance (mentor / executive)",
       "role": "Wealthy, calm banker/executive mentor who explains the math of profit, compounding and risk. Also usable as the 'modern rich guy' in split-screens.",
@@ -194,8 +285,19 @@
       "torso_outfit": "Dark charcoal-gray three-piece suit #3E3E42: jacket, buttoned waistcoat with three small buttons, white dress shirt, solid red necktie #B3261E. Matching charcoal trousers.",
       "limb_style": "Single thick black stick arms and legs.",
       "hands_and_feet": "BLACK rounded glove/mitten hands (his distinctive trait vs. other characters' white hands). Black rounded bean shoes.",
-      "signature_props": ["Round wire-rimmed spectacles (optional, for 'teaching' scenes)", "Chalk and a wooden pointer", "Pocket watch on a gold chain", "Leather briefcase"],
-      "color_lock": { "hair": "#1E1E1E", "suit": "#3E3E42", "tie": "#B3261E", "shirt": "#FFFFFF", "hands": "#1A1A1A" },
+      "signature_props": [
+        "Round wire-rimmed spectacles (optional, for 'teaching' scenes)",
+        "Chalk and a wooden pointer",
+        "Pocket watch on a gold chain",
+        "Leather briefcase"
+      ],
+      "color_lock": {
+        "hair": "#1E1E1E",
+        "suit": "#3E3E42",
+        "tie": "#B3261E",
+        "shirt": "#FFFFFF",
+        "hands": "#1A1A1A"
+      },
       "allowed_expressions": {
         "calm_neutral": "Straight eyebrows, dot eyes, short straight mouth. Default.",
         "approving": "Eyebrows slightly raised, small closed smile.",
@@ -203,9 +305,12 @@
         "amused_smirk": "One eyebrow up, one-sided smile.",
         "deadpan": "Flat eyebrows, blank dot eyes, tiny flat mouth (for comedic 'regressed' beats)."
       },
-      "do_not": ["No beard or stubble", "Do not switch tie color", "Do not give him white hands"]
+      "do_not": [
+        "No beard or stubble",
+        "Do not switch tie color",
+        "Do not give him white hands"
+      ]
     },
-
     "brokers_ensemble": {
       "display_name": "Brokers / traders / clerks (background ensemble)",
       "role": "Background crowd for exchanges, brokerages, banks and auctions. Reacting, clapping, phoning, reading tape.",
@@ -215,18 +320,36 @@
       "torso_outfit": "Muted long overcoats (charcoal, taupe #8C7A62, brown) over suits with ties; clerks wear vests over white shirts with sleeve garters.",
       "limb_style": "Single thick black stick arms and legs.",
       "hands_and_feet": "White rounded mitten hands. Dark bean shoes.",
-      "signature_props": ["Candlestick and rotary telephones", "Ticker tape", "Order slips and newspapers", "Briefcases", "Chalk for the price board"],
-      "color_lock": { "coats": ["#4A4440", "#8C7A62", "#5A4632"], "hats": ["#3A3633", "#5C4A3A"] },
+      "signature_props": [
+        "Candlestick and rotary telephones",
+        "Ticker tape",
+        "Order slips and newspapers",
+        "Briefcases",
+        "Chalk for the price board"
+      ],
+      "color_lock": {
+        "coats": [
+          "#4A4440",
+          "#8C7A62",
+          "#5A4632"
+        ],
+        "hats": [
+          "#3A3633",
+          "#5C4A3A"
+        ]
+      },
       "allowed_expressions": {
         "neutral": "Dot eyes, flat mouth.",
         "pleased_clapping": "Small closed smile, relaxed brows.",
         "busy_focused": "Slightly lowered brows, flat mouth, looking at papers/phone.",
         "concerned": "Brows up-in, small flat mouth."
       },
-      "do_not": ["Never more saturated than the hero", "Never more detailed faces than the hero"]
+      "do_not": [
+        "Never more saturated than the hero",
+        "Never more detailed faces than the hero"
+      ]
     }
   },
-
   "settings_library": {
     "front_porch": "Vintage small-town wooden front porch: painted clapboard house siding, screen door, porch steps, a milk crate, a hanging porch lamp, potted plants, a tree-lined dirt street in soft afternoon light.",
     "family_living_room": "Cozy 1940s living room: damask/floral warm-brown wallpaper, dark wood wainscoting, framed sepia family portrait on the wall, wooden side table with a vintage tube radio and a glowing fabric-shade table lamp, floral upholstered armchair, patterned red-brown rug on plank floor, warm amber lamplight.",
@@ -235,9 +358,9 @@
     "stock_exchange_floor": "Bustling 1920s stock exchange trading room: huge chalkboard covering the back wall with columns of tickers, prices and red/green changes, clerk on a wooden ladder updating prices, rows of wooden desks with candlestick phones and stacks of paper, a glass-dome ticker tape machine spilling tape into a wicker basket, tall multi-pane windows with city skyline silhouettes.",
     "bedroom_study_desk": "Sam's humble bedroom corner: small rough wooden desk and chair, oil lamp with glowing flame, a wall calendar hanging on a nail, plain warm-tan plaster wall, worn wooden floor.",
     "bank_office_chalkboard": "Wood-paneled 1930s private bank office: large slate chalkboard on an easel or wall, mahogany desk, green banker's lamp, bookshelves of ledgers, a globe, framed certificates, tall window with soft light.",
-    "modern_white_void": "Clean bright off-white #FAFAF7 studio void with a thin black floor line; used only for modern/comedic contrast panels."
+    "modern_white_void": "Clean bright off-white #FAFAF7 studio void with a thin black floor line; used only for modern/comedic contrast panels.",
+    "sam_living_room_chalkboard": "Warm vintage living room set for EP01: tan damask-dot wallpaper, crown moulding, a tall window with red curtains and a plant on the sill (left), dark-wood wainscoting, plank floor with an oval red rug, a cream-shaded floor lamp with warm glow, and a large wood-framed green chalkboard with a chalk tray filling the right wall."
   },
-
   "accent_presets": {
     "profit_green_arrow": "a single vivid profit-green (#2FA84F) upward arrow or bold green number",
     "red_sold_stamp": "a bold red (#C62828) rubber-stamp 'SOLD' imprint",
