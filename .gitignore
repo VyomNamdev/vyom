@@ -1,2 +1,4 @@
 channels/playbook/*.pdf
 channels/playbook/*.txt
+.cache/
+__pycache__/
