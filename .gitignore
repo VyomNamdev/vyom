@@ -6,3 +6,5 @@ __pycache__/
 channels/*/episodes/*/sprites/
 channels/*/episodes/*/layers/*.png
 channels/*/episodes/*/audio/mix_raw.wav
+channels/*/episodes/*/raea/out/*.mp4
+!channels/*/episodes/*/raea/out/*-share.mp4
