@@ -1,468 +1,578 @@
-"""Sam, the Paycheck to Plenty mascot, drawn as SVG (House Style A).
+"""Sam v2 — the Paycheck to Plenty mascot, drawn in code (House Style A).
 
-Builds the reference sheets used to keep Sam on-model in every scene:
-  python3 tools/sam.py   -> channel-bible/characters/*.svg
-Render to PNG with tools/render.js.
+Sam is 22-23, the funny older brother who explains money to his younger siblings.
+Tall, fit, dirty-blonde textured hair, sunglasses as his signature.
+
+He is built as a RIG: every limb is split into segments that rotate around real
+joints (shoulder, elbow, wrist, hip, knee, ankle), so arms and legs bend naturally
+when he moves in the videos. Overlapping segments are drawn with a two-pass
+outline so joints never show seams.
+
+  python3 tools/sam.py        -> channel-bible/characters/sam_*_v2.svg
+  node tools/render.js <svg>  -> PNG
 """
+from math import sin, cos, radians
 from pathlib import Path
 
-# ---------- locked palette (House Style A) ----------
-OUT = "#1E2433"      # outline
-SW = 5               # outline width
-SKIN, SKIN_SH = "#EDB892", "#D79B74"
-HAIR, HAIR_SH = "#4A3426", "#35251B"
-HOOD, HOOD_SH, HOOD_LT = "#2B4170", "#1F3157", "#3A5590"
-STRING = "#F6F3EA"
-PANTS, PANTS_SH = "#C7AE86", "#AD9269"
+# ---------------- locked palette ----------------
+OUT, SW = "#1E2433", 4.5
+SKIN, SKIN_SH, SKIN_DP, SKIN_HI = "#E9B795", "#CF9774", "#B47A5A", "#F6D3B8"
+LIP = "#C07A68"
+HAIR, HAIR_SH, HAIR_HI = "#B88A52", "#8C6537", "#E0BC84"
+BROW = "#7E5A33"
+TEE, TEE_SH, TEE_HI = "#2B4170", "#1F3157", "#3A5590"
+PANTS, PANTS_SH = "#C7AE86", "#A98F66"
 SHOE, SOLE, MINT = "#F7F4EC", "#D8D2C4", "#5FCB9F"
-IRIS = "#6B4226"
-MOUTH, TONGUE, TEETH = "#6E2A2E", "#E07A72", "#FFFFFF"
-BLUSH, TEAR, RED = "#F29B8A", "#8FD0F0", "#E5534B"
-BG, MINT_BG, YELLOW = "#FBF8F1", "#DDF3E8", "#F7C948"
+IRIS, IRIS_HI = "#5B7F9E", "#8FB3CF"          # blue-grey eyes
+SHADES, SHADES_HI = "#16202E", "#6E86A6"
+MOUTH, TONGUE, TEETH = "#5E2328", "#D8706A", "#FFFFFF"
+TEAR, RED, BLUSH = "#8FD0F0", "#E5534B", "#EE9C86"
+WATCH = "#2E2E2E"
+BG, MINT_BG = "#FBF8F1", "#DDF3E8"
 
-_uid = [0]
+_n = [0]
 
 
-def uid(p="c"):
-    _uid[0] += 1
-    return f"{p}{_uid[0]}"
+def uid(p):
+    _n[0] += 1
+    return f"{p}{_n[0]}"
 
 
 def P(d, fill="none", stroke=OUT, sw=SW, extra=""):
-    s = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
-    return (f'<path d="{d}" fill="{fill}"{s} stroke-linecap="round" '
+    st = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
+    return (f'<path d="{d}" fill="{fill}"{st} stroke-linecap="round" '
             f'stroke-linejoin="round" {extra}/>')
 
 
 def E(cx, cy, rx, ry, fill, stroke=OUT, sw=SW, extra=""):
-    s = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
-    return f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="{fill}"{s} {extra}/>'
+    st = f' stroke="{stroke}" stroke-width="{sw}"' if stroke else ""
+    return f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="{fill}"{st} {extra}/>'
 
 
-def mirror(svg):
-    return f'<g transform="scale(-1,1)">{svg}</g>'
+def clipped(shape_d, inner, tf=""):
+    c = uid("k")
+    return (f'<g {tf}><clipPath id="{c}"><path d="{shape_d}"/></clipPath>'
+            f'<g clip-path="url(#{c})">{inner}</g></g>')
 
 
-# ---------- FRONT HEAD ----------
-HEAD_F = ("M 0,0 C 40,0 64,28 64,72 C 64,100 56,122 40,138 C 28,149 14,154 0,154 "
-          "C -14,154 -28,149 -40,138 C -56,122 -64,100 -64,72 C -64,28 -40,0 0,0 Z")
-HAIR_F = ("M -66,84 C -76,40 -60,2 -28,-12 C -8,-22 24,-24 46,-12 C 70,2 78,40 66,84 "
-          "C 62,70 60,58 56,46 C 50,56 38,58 30,50 C 22,60 6,62 -4,52 "
-          "C -14,62 -32,62 -40,50 C -48,58 -56,62 -60,70 C -62,74 -64,78 -66,84 Z")
-COWLICK_F = "M 4,-18 C 8,-40 30,-46 38,-34 C 26,-34 18,-28 16,-14 Z"
+def lerp(a, b, t):
+    return a + (b - a) * t
 
 
-def eye(cx, cy, s, ex):
-    """One eye. s = +1 (viewer right) / -1 (viewer left). ex = expression dict."""
-    kind = ex.get("eye", "open")
-    out = []
-    if kind == "happy":       # closed ^ arcs
-        return P(f"M {cx-12*s},{cy+3} Q {cx},{cy-11} {cx+12*s},{cy+3}", sw=5)
-    if kind == "closed":      # relieved / content
-        return P(f"M {cx-12*s},{cy-1} Q {cx},{cy+8} {cx+12*s},{cy-1}", sw=5)
-    rx, ry = ex.get("eye_r", (11, 12))
-    clip = uid("eye")
-    sclera = f"M {cx-rx},{cy} A {rx},{ry} 0 1,0 {cx+rx},{cy} A {rx},{ry} 0 1,0 {cx-rx},{cy} Z"
-    out.append(f'<clipPath id="{clip}"><path d="{sclera}"/></clipPath>')
-    out.append(P(sclera, "#FFFFFF", sw=3))
-    lx, ly = ex.get("look", (0, 0))
-    if s > 0 and "look_r" in ex:
-        lx, ly = ex["look_r"]
-    pr = ex.get("pupil", 1.0)
-    g = [E(cx + lx, cy + 1 + ly, 7.5 * pr, 7.5 * pr, IRIS, stroke=None),
-         E(cx + lx, cy + 1 + ly, 3.6 * pr, 3.6 * pr, "#1A1410", stroke=None),
-         E(cx + lx - 2.4, cy - 2 + ly, 2.3, 2.3, "#FFFFFF", stroke=None)]
-    lid = ex.get("lid", 0.0)          # 0 = open, 1 = shut (upper lid)
-    if s > 0 and "lid_r" in ex:
-        lid = ex["lid_r"]
-    if lid:
-        ytop = cy - ry - 2
-        yl = cy - ry + 2 * ry * lid
-        g.append(f'<rect x="{cx-rx-3}" y="{ytop}" width="{2*rx+6}" height="{yl-ytop}" fill="{SKIN}"/>')
-    blid = ex.get("blid", 0.0)        # lower lid push-up (squint / sad)
-    if blid:
-        yb = cy + ry - 2 * ry * blid
-        g.append(f'<rect x="{cx-rx-3}" y="{yb}" width="{2*rx+6}" height="{ry*2}" fill="{SKIN}"/>')
-    out.append(f'<g clip-path="url(#{clip})">{"".join(g)}</g>')
-    # outline again on top so the clipped lids keep a clean edge
-    out.append(P(sclera, "none", sw=3))
-    if lid:
-        yl = cy - ry + 2 * ry * lid
-        out.append(P(f"M {cx-rx-2},{yl+1} Q {cx},{yl-3} {cx+rx+2},{yl+1}", sw=4.5))
-    else:
-        out.append(P(f"M {cx-rx-1},{cy-2} Q {cx},{cy-ry-5} {cx+rx+1},{cy-2}", sw=4.5))
-    if blid:
-        yb = cy + ry - 2 * ry * blid
-        out.append(P(f"M {cx-rx},{yb} Q {cx},{yb+3} {cx+rx},{yb}", sw=3))
-    return "".join(out)
+# ============ RIG: limb segments ============
+def limb(L, wt, wb, bo=0.0, bi=0.0):
+    """Tapered capsule from (0,0) down to (0,L). bo/bi = outer/inner bulge."""
+    a, b = wt / 2, wb / 2
+    return (f"M {-a},0 A {a},{a} 0 0 1 {a},0 "
+            f"C {a+bo},{L*0.35} {b+bo*0.5},{L*0.7} {b},{L} "
+            f"A {b},{b} 0 0 1 {-b},{L} "
+            f"C {-b-bi*0.5},{L*0.7} {-a-bi},{L*0.35} {-a},0 Z")
 
 
-EXPRESSIONS = {
-    # brows: (outer_y, mid_y, inner_y) for viewer-left brow; mirrored unless brow_r given
-    "neutral":  dict(brow=(71, 63, 66), mouth="neutral"),
-    "worried":  dict(brow=(74, 67, 58), mouth="worried", look=(-2, 1), pupil=0.9, sweat=True),
-    "happy":    dict(brow=(66, 56, 62), eye="happy", mouth="grin", blush=True),
-    "sad":      dict(brow=(76, 70, 60), mouth="sad", look=(0, 4), lid=0.35, tear=True),
-    "angry":    dict(brow=(62, 68, 80), mouth="teeth", lid=0.38, vein=True, pupil=0.85),
-    "grumpy":   dict(brow=(72, 74, 78), mouth="grumpy", lid=0.5, look=(3, 1)),
-    "shocked":  dict(brow=(58, 46, 52), eye_r=(13, 15), pupil=0.7, mouth="o", lines=True),
-    "smug":     dict(brow=(70, 68, 72), brow_r=(52, 56, 64), lid=0.45, look=(4, 0),
-                     look_r=(4, 0), mouth="smirk", blush=True),
-    "confused": dict(brow=(72, 66, 68), brow_r=(56, 52, 60), look=(-4, -4), mouth="squiggle",
-                     question=True),
-    "relieved": dict(brow=(70, 62, 64), eye="closed", mouth="relief", sigh=True),
+HANDS = {
+    "relaxed": (["M -15,0 C -18,20 -19,40 -16,56 C -14,70 -6,80 2,80 C 10,80 16,70 17,56 "
+                 "C 18,40 17,20 15,0 Z",
+                 "M 13,12 C 26,18 28,38 21,50 C 17,55 12,51 13,44 Z"],
+                [("M -6,48 L -6,72", 2), ("M 3,50 L 4,77", 2), ("M 11,48 L 11,68", 2)]),
+    "open": (["M -18,0 C -20,18 -21,34 -18,46 L 18,46 C 21,34 20,18 18,0 Z",
+              limb(40, 11, 10), limb(44, 11, 10), limb(42, 11, 10), limb(34, 10, 9),
+              limb(30, 12, 11)],
+             []),
+    "point": (["M -16,0 C -18,14 -19,30 -15,42 C -9,49 9,49 15,42 C 19,30 18,14 16,0 Z",
+               limb(46, 11, 10), "M 14,10 C 24,16 24,30 16,36 Z"],
+              [("M -12,34 Q -2,38 8,34", 2)]),
+}
+HAND_TF = {
+    "open": ["", "translate(-14,40) rotate(14)", "translate(-4,44) rotate(4)",
+             "translate(6,44) rotate(-6)", "translate(15,40) rotate(-16)",
+             "translate(17,12) rotate(-60)"],
+    "point": ["", "translate(-9,40) rotate(2)", ""],
+    "relaxed": ["", ""],
 }
 
 
-def brow(vals, s):
-    o, m, i = vals
-    xo, xm, xi = 46 * s, 31 * s, 15 * s
-    return P(f"M {xo},{o} Q {xm},{m - 4} {xi},{i}", stroke=HAIR, sw=8)
+def hand_shapes(kind, s):
+    ds, details = HANDS[kind]
+    out = [(f"scale({s},1) {t}", d) for d, t in zip(ds, HAND_TF[kind])]
+    det = "".join(P(d, stroke=SKIN_DP, sw=w) for d, w in details)
+    k = abs(s)
+    out = [(f"scale({s},{k}) {t}", d) for d, t in zip(ds, HAND_TF[kind])]
+    return out, f'<g transform="scale({s},{k})">{det}</g>'
+
+
+def fk(x, y, angles, lengths):
+    """Forward kinematics. Angles are ABSOLUTE degrees (0 = straight down,
+    + = clockwise on screen = swings toward viewer-left)."""
+    pts = [(x, y)]
+    for a, L in zip(angles, lengths):
+        x, y = x - L * sin(radians(a)), y + L * cos(radians(a))
+        pts.append((x, y))
+    return pts
+
+
+def union_group(parts, fill, shade=None):
+    """parts: list of (transform, d). Two-pass outline so overlapping joints merge seamlessly."""
+    p1 = "".join(f'<path d="{d}" transform="{t}" fill="{OUT}" stroke="{OUT}" '
+                 f'stroke-width="{SW*2}" stroke-linejoin="round"/>' for t, d in parts)
+    p2 = "".join(f'<path d="{d}" transform="{t}" fill="{fill}"/>' for t, d in parts)
+    sh = ""
+    if shade:
+        for t, d in parts:
+            sh += clipped(d, f'<rect x="6" y="-60" width="194" height="400" fill="{shade}" opacity="0.9"/>',
+                          f'transform="{t}"')
+    return p1 + p2 + sh
+
+
+# ---- arm ----
+ARM = dict(upper=168, fore=152)
+
+
+def arm(sx, sy, a_up, a_fore, a_hand, s, hand="relaxed", watch=False, sleeve=True, skin=SKIN):
+    """s = -1 for the arm on viewer-left (Sam's right), +1 for viewer-right."""
+    (x0, y0), (x1, y1), (x2, y2) = fk(sx, sy, [a_up, a_fore], [ARM["upper"], ARM["fore"]])
+    tf_u = f"translate({x0},{y0}) rotate({a_up})"
+    tf_f = f"translate({x1},{y1}) rotate({a_fore})"
+    tf_h = f"translate({x2},{y2}) rotate({a_hand})"
+    parts = [(tf_u, limb(ARM["upper"], 60, 46, bo=10, bi=5)),
+             (tf_f, limb(ARM["fore"], 50, 36, bo=7, bi=2))]
+    hs, hdet = hand_shapes(hand, (-s if hand != "relaxed" else s) * 1.15)
+    parts += [(f"{tf_h} {t}", d) for t, d in hs]
+    o = [union_group(parts, skin, SKIN_SH)]
+    o.append(f'<g transform="{tf_u}">' + P(f"M {-8*s},40 Q {-18*s},88 {-10*s},140", stroke=SKIN_DP, sw=2.2) + "</g>")
+    o.append(f'<g transform="{tf_f}">' + P(f"M {9*s},20 Q {14*s},60 {6*s},110", stroke=SKIN_DP, sw=2.2) + "</g>")
+    o.append(f'<g transform="{tf_h}">{hdet}</g>')
+    if watch:
+        o.append(f'<g transform="{tf_f}"><rect x="-20" y="{ARM["fore"]-26}" width="40" height="13" rx="4" '
+                 f'fill="{WATCH}" stroke="{OUT}" stroke-width="2.5"/>'
+                 f'<rect x="-8" y="{ARM["fore"]-28}" width="16" height="17" rx="4" fill="#C9D3DF" '
+                 f'stroke="{OUT}" stroke-width="2.5"/></g>')
+    if sleeve:  # snug t-shirt sleeve
+        sl = ("M -38,-6 C -42,20 -42,46 -38,68 C -14,76 14,76 38,68 C 42,46 42,20 38,-6 "
+              "C 28,-34 -28,-34 -38,-6 Z")
+        o.append(f'<g transform="{tf_u}">' + P(sl, TEE, stroke=None)
+                 + clipped(sl, f'<rect x="10" y="-40" width="40" height="140" fill="{TEE_SH}"/>')
+                 + P("M -38,60 C -14,68 14,68 38,60", stroke=TEE_SH, sw=3)
+                 + P(sl, "none") + "</g>")
+    return "".join(o)
+
+
+# ---- legs / shoes ----
+LEG = dict(thigh=226, shin=214)
+
+
+def shoe(x, y, ang, view="front"):
+    if view == "front":
+        d = "M -27,-8 C -31,12 -33,30 -29,42 C -20,50 20,50 29,42 C 33,30 31,12 27,-8 Z"
+        det = P("M -29,36 C -14,42 14,42 29,36", sw=3) + P("M -18,14 Q 0,22 18,14", stroke=MINT, sw=5)
+    else:
+        d = ("M -14,-10 L 18,-10 C 26,8 28,28 24,42 L -58,42 C -66,34 -62,20 -46,14 "
+             "C -32,10 -20,4 -14,-10 Z")
+        det = P("M -60,34 L 24,34", sw=3) + P("M -40,20 Q -14,28 14,18", stroke=MINT, sw=5)
+    return f'<g transform="translate({x},{y}) rotate({ang}) scale(1.3)">' + P(d, SHOE) + det + "</g>"
+
+
+def leg_parts(hips, angles):
+    parts, ankles = [], []
+    for (hx, hy), (at, ash, af) in zip(hips, angles):
+        (x0, y0), (x1, y1), (x2, y2) = fk(hx, hy, [at, ash], [LEG["thigh"], LEG["shin"]])
+        parts.append([(f"translate({x0},{y0}) rotate({at})", limb(LEG["thigh"], 88, 62, bo=8, bi=5)),
+                      (f"translate({x1},{y1}) rotate({ash})", limb(LEG["shin"], 62, 46, bo=7, bi=2))])
+        ankles.append((x2, y2, af))
+    return parts, ankles
+
+
+def pants_and_legs(hips, angles, pelvis, view="front", dark_first=False):
+    parts, ankles = leg_parts(hips, angles)
+    o = []
+    if dark_first:  # far leg behind, darker
+        o.append(union_group(parts[0], PANTS_SH))
+        o.append(shoe(*ankles[0], view=view))
+        parts, ankles = parts[1:], ankles[1:]
+    flat = [p for leg in parts for p in leg] + [("", pelvis)]
+    o.append(union_group(flat, PANTS, PANTS_SH))
+    for leg in parts:  # knee crease
+        o.append(f'<g transform="{leg[1][0]}">' + P("M -14,-6 Q 0,2 14,-8", stroke=PANTS_SH, sw=3) + "</g>")
+    for a in ankles:
+        o.append(shoe(*a, view=view))
+    if view == "front":
+        o.append(P("M 0,512 L 0,590", stroke=PANTS_SH, sw=3))
+    return "".join(o)
+
+
+# ============ HEADS ============
+HEAD_F = ("M 0,0 C 34,0 56,22 57,56 C 58,78 56,98 52,112 C 49,124 40,136 26,146 "
+          "C 18,151 8,153 0,153 C -8,153 -18,151 -26,146 C -40,136 -49,124 -52,112 "
+          "C -56,98 -58,78 -57,56 C -56,22 -34,0 0,0 Z")
+HAIR_F = ("M -57,66 C -63,40 -61,16 -50,2 C -44,-16 -26,-32 -2,-36 C 24,-40 50,-28 57,-6 "
+          "C 63,10 62,34 58,64 C 56,50 53,42 48,38 C 42,30 32,28 22,32 C 14,24 2,22 -8,28 "
+          "C -18,24 -32,28 -38,36 C -46,38 -52,46 -55,56 Z")
+
+
+def brow_shape(s, yi, yp, yo):
+    xi, xp, xo = 9 * s, 25 * s, 41 * s
+    return P(f"M {xi},{yi-4} Q {xp},{yp-5} {xo},{yo-1} Q {xp},{yp+1} {xi},{yi+3} Z",
+             BROW, stroke=BROW, sw=1.5)
+
+
+def eye(cx, cy, s, ex):
+    xi, xo = cx - 13 * s, cx + 13 * s
+    kind = ex.get("eye", "open")
+    if kind == "happy":
+        return (P(f"M {xi},{cy+2} Q {cx},{cy-9} {xo},{cy+1}", sw=4.5)
+                + P(f"M {lerp(xi,xo,.2)},{cy+9} Q {cx},{cy+5} {lerp(xi,xo,.85)},{cy+8}", stroke=SKIN_DP, sw=2))
+    if kind == "closed":
+        return (P(f"M {xi},{cy} Q {cx},{cy+7} {xo},{cy-1}", sw=4.5)
+                + P(f"M {lerp(xi,xo,.2)},{cy-9} Q {cx},{cy-13} {lerp(xi,xo,.85)},{cy-9}", stroke=SKIN_DP, sw=2))
+    ru, rl = (12, 9) if kind == "wide" else (9, 7)
+    d = (f"M {xi},{cy+1} C {lerp(xi,xo,.3)},{cy-ru} {lerp(xi,xo,.75)},{cy-ru} {xo},{cy-1} "
+         f"C {lerp(xi,xo,.7)},{cy+rl} {lerp(xi,xo,.3)},{cy+rl} {xi},{cy+1} Z")
+    lx, ly = ex.get("look_r" if s > 0 and "look_r" in ex else "look", (0, 0))
+    pr = ex.get("pupil", 1.0)
+    inner = [E(cx + lx, cy + ly, 6.8, 6.8, IRIS, stroke=OUT, sw=1.5),
+             E(cx + lx - 1.5, cy + ly + 2, 4, 3, IRIS_HI, stroke=None, extra='opacity="0.6"'),
+             E(cx + lx, cy + ly, 3.1 * pr, 3.1 * pr, "#111", stroke=None),
+             E(cx + lx - 2.4, cy + ly - 2.4, 1.9, 1.9, "#FFF", stroke=None)]
+    lid = ex.get("lid_r" if s > 0 and "lid_r" in ex else "lid", 0.15)
+    yl = cy - ru + (ru + rl) * lid
+    inner.append(f'<rect x="{min(xi,xo)-3}" y="{cy-ru-4}" width="32" height="{yl-(cy-ru-4)}" fill="{SKIN_SH}"/>')
+    o = [P(d, "#FBFAF7", stroke=None), clipped(d, "".join(inner))]
+    top = max(cy - ru, yl - 2)
+    o.append(P(f"M {xi},{cy+1} C {lerp(xi,xo,.3)},{top} {lerp(xi,xo,.75)},{top} {xo},{cy-1} "
+               f"L {xo+3*s},{cy-3}", sw=4))
+    o.append(P(f"M {lerp(xi,xo,.15)},{cy+4} C {lerp(xi,xo,.35)},{cy+rl} {lerp(xi,xo,.7)},{cy+rl} {xo},{cy}",
+               stroke=SKIN_DP, sw=1.8))
+    o.append(P(f"M {lerp(xi,xo,.25)},{cy-ru-4} Q {cx},{cy-ru-8} {lerp(xi,xo,.9)},{cy-ru-3}",
+               stroke=SKIN_DP, sw=1.8))
+    return "".join(o)
+
+
+def sunglasses(on_face):
+    y, w, h = (72, 46, 26) if on_face else (-10, 40, 20)
+    o = []
+    if on_face:
+        o.append(P(f"M -50,{y+4} L -57,{y+8} M 50,{y+4} L 57,{y+8}", stroke=SHADES, sw=4))
+    for s in (-1, 1):
+        x0 = 4 if s > 0 else -4 - w
+        lens = (f"M {x0},{y} L {x0+w},{y} C {x0+w+1},{y+h*0.6} {x0+w-6},{y+h} {x0+w/2},{y+h} "
+                f"C {x0+6},{y+h} {x0-1},{y+h*0.6} {x0},{y} Z")
+        o.append(P(lens, SHADES, sw=4))
+        o.append(P(f"M {x0+8},{y+5} L {x0+18},{y+h-6}", stroke=SHADES_HI, sw=3))
+        o.append(P(f"M {x0+16},{y+4} L {x0+21},{y+11}", stroke=SHADES_HI, sw=2))
+    o.append(P(f"M -4,{y+3} Q 0,{y-1} 4,{y+3}", stroke=SHADES, sw=4))
+    return "".join(o)
+
+
+EXPR = {
+    "neutral":  dict(brow=(64, 57, 61), mouth="soft"),
+    "happy":    dict(brow=(61, 53, 58), eye="happy", mouth="grin", blush=True),
+    "laughing": dict(brow=(60, 51, 57), eye="happy", mouth="laugh", blush=True, lines=True),
+    "worried":  dict(brow=(57, 60, 66), mouth="worried", look=(-2, 1), lid=0.1, sweat=True),
+    "sad":      dict(brow=(56, 61, 68), mouth="sad", look=(0, 3), lid=0.35, tear=True),
+    "angry":    dict(brow=(70, 62, 57), mouth="teeth", lid=0.35, vein=True, pupil=0.85),
+    "grumpy":   dict(brow=(68, 66, 64), mouth="grumpy", lid=0.5, look=(3, 1)),
+    "shocked":  dict(brow=(54, 44, 50), eye="wide", pupil=0.75, lid=0.0, mouth="o", lines=True),
+    "smug":     dict(brow=(65, 61, 63), brow_r=(60, 49, 54), lid=0.45, look=(4, 0), mouth="smirk"),
+    "confused": dict(brow=(64, 60, 63), brow_r=(56, 48, 54), look=(-4, -3), mouth="squiggle",
+                     question=True),
+    "relieved": dict(brow=(62, 56, 60), eye="closed", mouth="relief", puff=True),
+    "cool":     dict(brow=(63, 56, 58), mouth="smirk", shades_on=True),
+}
 
 
 def mouth(kind):
-    if kind == "neutral":
-        return P("M -14,130 Q -5,126 3,129 Q 9,131 14,127", sw=4)
+    lower = P("M -9,138 Q 0,141 9,138", stroke=LIP, sw=2.5)
+    if kind == "soft":
+        return (P("M -17,129 Q -8,130 0,130 Q 8,130 17,128", sw=3.5)
+                + P("M 17,128 Q 20,126 21,123", sw=2.5) + P("M -17,129 Q -20,127 -21,124", sw=2.5) + lower)
     if kind == "worried":
-        return P("M -17,133 Q -9,125 -1,130 Q 7,135 17,128", sw=4)
+        return P("M -16,132 Q -8,126 0,130 Q 8,134 16,129", sw=3.5) + lower
     if kind == "sad":
-        return P("M -16,136 Q 0,122 16,136", sw=4.5)
+        return P("M -15,134 Q 0,126 15,134", sw=3.5) + P("M -8,140 Q 0,142 8,140", stroke=LIP, sw=2.5)
     if kind == "grumpy":
-        return P("M -15,133 Q -2,128 15,135", sw=4.5) + P("M 15,135 L 19,138", sw=3.5)
+        return (P("M -15,132 Q 0,130 15,133", sw=3.5)
+                + P("M 15,133 L 18,136 M -15,132 L -18,135", sw=2.5) + lower)
     if kind == "smirk":
-        return P("M -12,131 Q 6,136 19,121", sw=4.5) + P("M 19,121 L 22,124", sw=3)
+        return (P("M -14,131 Q 4,134 19,124", sw=3.5) + P("M 19,124 L 22,121", sw=2.5)
+                + P("M -4,139 Q 4,141 11,137", stroke=LIP, sw=2.5))
     if kind == "squiggle":
-        return P("M -12,131 Q -6,126 0,131 Q 6,136 12,130", sw=4)
+        return P("M -12,132 Q -6,127 0,132 Q 6,137 12,131", sw=3.5) + lower
     if kind == "relief":
-        return P("M -13,128 Q 0,138 13,128", sw=4.5)
+        return P("M -15,128 Q 0,137 15,128", sw=3.5) + lower
     if kind == "o":
-        return (E(0, 132, 10, 13, MOUTH, sw=4) + E(0, 139, 6, 4, TONGUE, stroke=None))
-    if kind == "grin":
-        clip = uid("m")
-        shape = "M -27,119 Q 0,121 27,119 Q 24,148 0,150 Q -24,148 -27,119 Z"
-        return (f'<clipPath id="{clip}"><path d="{shape}"/></clipPath>'
-                + P(shape, MOUTH, sw=0, stroke=None)
-                + f'<g clip-path="url(#{clip})"><rect x="-30" y="115" width="60" height="11" fill="{TEETH}"/>'
-                + E(0, 151, 15, 9, TONGUE, stroke=None) + "</g>" + P(shape, "none", sw=4.5))
+        return E(0, 133, 10, 13, MOUTH, sw=3.5) + E(0, 140, 6, 4, TONGUE, stroke=None)
+    if kind in ("grin", "laugh"):
+        h = 22 if kind == "grin" else 30
+        shape = f"M -24,124 Q 0,128 24,124 Q 20,{124+h} 0,{126+h} Q -20,{124+h} -24,124 Z"
+        inner = (f'<rect x="-30" y="118" width="60" height="12" fill="{TEETH}"/>'
+                 + E(0, 126 + h, 14, 9, TONGUE, stroke=None))
+        return P(shape, MOUTH, stroke=None) + clipped(shape, inner) + P(shape, "none", sw=3.5)
     if kind == "teeth":
-        clip = uid("m")
-        shape = "M -22,124 Q 0,119 22,124 L 20,138 Q 0,142 -20,138 Z"
-        return (f'<clipPath id="{clip}"><path d="{shape}"/></clipPath>'
-                + P(shape, TEETH, sw=0, stroke=None)
-                + f'<g clip-path="url(#{clip})">'
-                + "".join(P(f"M {x},118 L {x},144", sw=2) for x in (-12, -4, 4, 12))
-                + P("M -24,131 Q 0,129 24,131", sw=2.5) + "</g>" + P(shape, "none", sw=4.5))
+        shape = "M -21,126 Q 0,122 21,126 L 19,139 Q 0,142 -19,139 Z"
+        inner = "".join(P(f"M {x},118 L {x},146", sw=1.6) for x in (-11, -4, 4, 11)) + P("M -24,132 L 24,132", sw=2)
+        return P(shape, TEETH, stroke=None) + clipped(shape, inner) + P(shape, "none", sw=3.5)
     return ""
 
 
-def head_front(exname="neutral"):
-    ex = EXPRESSIONS[exname]
-    clip = uid("head")
-    o = [f'<clipPath id="{clip}"><path d="{HEAD_F}"/></clipPath>']
-    # ears
-    for s in (-1, 1):
-        o.append(E(64 * s, 86, 11, 17, SKIN))
-        o.append(P(f"M {64*s - 2*s},{76} Q {70*s},{86} {63*s},{96}", sw=3))
-    o.append(P(HEAD_F, SKIN, stroke=None))
-    # cel shade: right side of face + under the fringe
-    o.append(f'<g clip-path="url(#{clip})">'
-             + P("M 44,-10 C 72,40 70,112 26,170 L 120,170 L 120,-10 Z", SKIN_SH, stroke=None)
-             + P("M -70,60 C -40,72 -10,74 10,64 C 30,72 50,70 70,58 L 70,40 L -70,40 Z",
-                 SKIN_SH, stroke=None, extra='opacity="0.55"')
-             + "</g>")
-    o.append(P(HEAD_F, "none"))
-    # hair
+def head_front(name="neutral"):
+    ex = EXPR[name]
+    o = []
+    for s in (-1, 1):   # ears
+        o.append(P(f"M {55*s},70 C {67*s},62 {74*s},74 {71*s},88 C {69*s},100 {63*s},110 {54*s},106 Z", SKIN))
+        o.append(P(f"M {58*s},76 C {65*s},74 {67*s},84 {62*s},96", stroke=SKIN_DP, sw=2.5))
+    shade = (P("M 34,-10 C 60,40 58,110 18,170 L 120,170 L 120,-10 Z", SKIN_SH, stroke=None)
+             + P("M -60,46 C -30,60 20,58 60,44 L 60,20 L -60,20 Z", SKIN_SH, stroke=None, extra='opacity="0.6"')
+             + P("M -44,96 C -40,110 -34,118 -26,124", stroke=SKIN_SH, sw=4, extra='opacity="0.8"')
+             + E(-28, 104, 12, 8, SKIN_HI, stroke=None, extra='opacity="0.5"'))
+    o.append(P(HEAD_F, SKIN, stroke=None) + clipped(HEAD_F, shade) + P(HEAD_F, "none"))
     o.append(P(HAIR_F, HAIR))
-    o.append(P("M 20,-16 C 40,-10 58,8 62,38 C 54,24 40,10 20,-16 Z", HAIR_SH, stroke=None))
-    o.append(P(COWLICK_F, HAIR))
-    o.append(P("M -30,-4 C -20,8 -8,12 4,10", stroke=HAIR_SH, sw=3))
-    # brows
-    o.append(brow(ex["brow"], -1))
-    o.append(brow(ex.get("brow_r", ex["brow"]), 1))
-    # eyes
-    o.append(eye(-28, 89, -1, ex))
-    o.append(eye(28, 89, 1, ex))
-    # nose
-    o.append(P("M -2,97 Q -7,110 -1,115 Q 5,116 9,111", sw=3.5))
+    o.append(clipped(HAIR_F, P("M 20,-50 C 50,-20 64,20 60,70 L 100,70 L 100,-50 Z", HAIR_SH, stroke=None)))
+    for d in ("M -40,-6 C -30,-22 -12,-30 8,-30", "M -28,10 C -18,-8 4,-18 26,-18",
+              "M -8,22 C 2,8 20,0 40,2", "M -48,26 C -44,10 -36,0 -26,-6"):
+        o.append(P(d, stroke=HAIR_SH, sw=2.5))
+    for d in ("M -34,-16 C -22,-26 -6,-30 6,-30", "M -18,4 C -6,-6 8,-12 20,-12"):
+        o.append(P(d, stroke=HAIR_HI, sw=4))
+    o.append(P("M -2,-36 C 8,-48 24,-48 30,-38 C 22,-40 14,-38 10,-30 Z", HAIR))
+    o.append(brow_shape(-1, *ex["brow"]))
+    o.append(brow_shape(1, *ex.get("brow_r", ex["brow"])))
+    if ex.get("shades_on"):
+        o.append(sunglasses(True))
+    else:
+        o.append(eye(-23, 82, -1, ex))
+        o.append(eye(23, 82, 1, ex))
+    o.append(P("M 7,76 C 9,90 11,100 12,108", stroke=SKIN_SH, sw=3))
+    o.append(P("M -11,111 C -13,118 -7,120 -3,117 Q 0,119 3,117 C 7,120 13,118 11,111", sw=3))
+    o.append(P("M -3,104 C 0,108 4,108 6,105", stroke=SKIN_DP, sw=2))
     if ex.get("blush"):
-        o.append(E(-40, 114, 11, 6, BLUSH, stroke=None, extra='opacity="0.7"'))
-        o.append(E(40, 114, 11, 6, BLUSH, stroke=None, extra='opacity="0.7"'))
+        o.append(E(-34, 112, 10, 5, BLUSH, stroke=None, extra='opacity="0.6"'))
+        o.append(E(34, 112, 10, 5, BLUSH, stroke=None, extra='opacity="0.6"'))
     o.append(mouth(ex["mouth"]))
-    # extras
+    o.append(P("M -10,148 Q 0,151 10,148", stroke=SKIN_SH, sw=2.5))
+    if not ex.get("shades_on"):
+        o.append(sunglasses(False))
     if ex.get("sweat"):
-        o.append(P("M 72,40 C 64,54 64,64 72,66 C 80,64 80,54 72,40 Z", TEAR, sw=3))
+        o.append(P("M 66,30 C 58,44 58,54 66,56 C 74,54 74,44 66,30 Z", TEAR, sw=2.5))
     if ex.get("tear"):
-        o.append(P("M -30,104 C -36,118 -36,126 -30,128 C -24,126 -24,118 -30,104 Z", TEAR, sw=3))
+        o.append(P("M -26,92 C -32,106 -32,114 -26,116 C -20,114 -20,106 -26,92 Z", TEAR, sw=2.5))
     if ex.get("vein"):
-        for d in ("M 36,24 Q 44,30 42,38", "M 50,22 Q 48,30 56,34",
-                  "M 36,46 Q 44,40 42,34", "M 56,46 Q 50,40 54,34"):
-            o.append(P(d, stroke=RED, sw=5))
+        for d in ("M 32,26 Q 40,32 38,40", "M 46,24 Q 44,32 52,36", "M 32,48 Q 40,42 38,36", "M 52,48 Q 46,42 50,36"):
+            o.append(P(d, stroke=RED, sw=4.5))
     if ex.get("lines"):
-        for d in ("M -86,20 L -100,6", "M -92,48 L -110,44", "M 86,20 L 100,6", "M 92,48 L 110,44"):
-            o.append(P(d, sw=5))
+        for d in ("M -80,20 L -94,6", "M -86,48 L -104,44", "M 80,20 L 94,6", "M 86,48 L 104,44"):
+            o.append(P(d, sw=4.5))
     if ex.get("question"):
-        o.append(f'<text x="80" y="20" font-family="Inter" font-weight="900" font-size="64" '
-                 f'fill="{HOOD}" stroke="{OUT}" stroke-width="2">?</text>')
-    if ex.get("sigh"):
-        for cx, cy, r in ((32, 140, 5), (44, 134, 7), (60, 126, 9)):
-            o.append(E(cx, cy, r, r, "#DCEBF7", stroke="#9BB7D4", sw=3))
+        o.append(f'<text x="72" y="14" font-family="Inter" font-weight="900" font-size="60" '
+                 f'fill="{TEE}" stroke="{OUT}" stroke-width="2">?</text>')
+    if ex.get("puff"):
+        for cx, cy, r in ((30, 140, 4), (41, 134, 6), (55, 126, 8)):
+            o.append(E(cx, cy, r, r, "#DCEBF7", stroke="#9BB7D4", sw=2.5))
     return "".join(o)
 
 
-# ---------- FRONT BODY ----------
-def body_front():
-    o = []
-    # legs
-    o.append(P("M -100,530 L -94,700 L -88,892 L -14,892 L -6,602 L 6,602 L 14,892 "
-               "L 88,892 L 94,700 L 100,530 Z", PANTS))
-    o.append(P("M 6,602 L 14,892 L 40,892 L 26,610 Z", PANTS_SH, stroke=None))
-    o.append(P("M 0,540 L 0,600", sw=3))
-    # shoes
-    for s in (-1, 1):
-        shoe = (f"M {-90*s},886 L {-92*s},928 C {-94*s},946 {-4*s},948 {-2*s},934 "
-                f"C {-2*s},914 {-10*s},900 {-14*s},886 Z")
-        o.append(P(shoe, SHOE))
-        o.append(P(f"M {-92*s},930 C {-60*s},938 {-30*s},938 {-2*s},932", sw=3))
-        o.append(P(f"M {-74*s},904 Q {-50*s},914 {-26*s},904", stroke=MINT, sw=6))
-    # neck
-    o.append(P("M -21,130 L -21,196 L 21,196 L 21,130 Z", SKIN))
-    o.append(P("M -21,140 Q 0,166 21,140 L 21,170 L -21,170 Z", SKIN_SH, stroke=None))
-    # sleeves (behind torso edge)
-    for s in (-1, 1):
-        o.append(P(f"M {-100*s},200 C {-134*s},208 {-150*s},240 {-152*s},290 L {-160*s},474 "
-                   f"C {-146*s},484 {-124*s},484 {-114*s},476 L {-110*s},300 Z",
-                   HOOD if s < 0 else HOOD_SH))
-        o.append(P(f"M {-160*s},462 C {-146*s},470 {-126*s},470 {-114*s},464 L {-114*s},482 "
-                   f"C {-124*s},492 {-146*s},492 {-160*s},484 Z", HOOD_SH, sw=4))
-        # hand
-        o.append(P(f"M {-156*s},486 C {-162*s},514 {-150*s},534 {-136*s},534 "
-                   f"C {-122*s},534 {-114*s},516 {-118*s},486 Z", SKIN))
-        o.append(P(f"M {-118*s},494 C {-108*s},500 {-108*s},512 {-118*s},516", SKIN, sw=4))
-    # torso
-    torso = ("M -45,182 C -85,186 -110,198 -118,226 L -112,400 C -110,450 -108,500 -112,540 "
-             "C -60,552 60,552 112,540 C 108,500 110,450 112,400 L 118,226 C 110,198 85,186 45,182 Z")
-    clip = uid("torso")
-    o.append(f'<clipPath id="{clip}"><path d="{torso}"/></clipPath>')
-    o.append(P(torso, HOOD, stroke=None))
-    o.append(f'<g clip-path="url(#{clip})">'
-             + P("M 70,170 C 90,300 84,450 96,560 L 140,560 L 140,170 Z", HOOD_SH, stroke=None)
-             + "</g>")
-    o.append(P(torso, "none"))
-    # pocket + hem
-    o.append(P("M -72,470 L -58,372 L 58,372 L 72,470", sw=4))
-    o.append(P("M -58,372 L -64,470 M 58,372 L 64,470", stroke=HOOD_SH, sw=3))
-    o.append(P("M -112,516 C -60,528 60,528 112,516", sw=4))
-    # hood collar
-    o.append(P("M -68,194 C -66,166 -38,166 -22,180 L 22,180 C 38,166 66,166 68,194 "
-               "C 58,226 -58,226 -68,194 Z", HOOD_LT))
-    o.append(P("M -22,180 C -10,198 10,198 22,180", sw=4))
-    # drawstrings
-    for s in (-1, 1):
-        o.append(P(f"M {14*s},200 C {16*s},236 {18*s},266 {20*s},292", stroke=STRING, sw=6))
-        o.append(f'<rect x="{20*s - 4}" y="290" width="8" height="14" rx="3" fill="{SOLE}" '
-                 f'stroke="{OUT}" stroke-width="2.5"/>')
-    return "".join(o)
-
-
-def sam_front(exname="neutral"):
-    return body_front() + head_front(exname)
-
-
-# ---------- THREE-QUARTER (facing viewer-left) ----------
-def sam_three_quarter():
-    o = []
-    # far leg (behind) and near leg
-    o.append(P("M -88,530 L -86,700 L -84,888 L -18,888 L -4,600 L 40,530 Z", PANTS_SH))
-    o.append(P("M -30,560 L -16,890 L 70,890 L 84,700 L 92,530 Z", PANTS))
-    # shoes pointing left
-    o.append(P("M -86,884 L -110,920 C -114,940 -30,944 -20,930 C -18,912 -22,898 -24,884 Z", SHOE))
-    o.append(P("M -112,926 C -80,934 -46,934 -20,928", sw=3))
-    o.append(P("M -16,886 L -38,924 C -42,944 60,948 70,932 C 72,912 68,898 66,886 Z", SHOE))
-    o.append(P("M -40,928 C 0,938 40,938 70,930", sw=3))
-    o.append(P("M -12,904 Q 16,914 46,904", stroke=MINT, sw=6))
-    # far sleeve (peeks out left)
-    o.append(P("M -70,204 C -100,214 -112,250 -114,300 L -118,470 C -106,480 -90,478 -84,470 "
-               "L -80,300 Z", HOOD_SH))
-    o.append(P("M -118,484 C -122,510 -112,528 -100,528 C -88,528 -82,510 -86,484 Z", SKIN_SH))
-    # neck
-    o.append(P("M -18,130 L -16,196 L 26,196 L 26,128 Z", SKIN))
-    o.append(P("M -18,140 Q 4,166 26,140 L 26,172 L -18,172 Z", SKIN_SH, stroke=None))
-    # torso (near side wider)
-    torso = ("M -36,182 C -70,186 -90,200 -96,228 L -92,400 C -90,450 -88,500 -92,540 "
-             "C -40,552 70,552 112,540 C 108,500 110,450 112,400 L 116,228 C 108,198 86,186 52,182 Z")
-    clip = uid("torso")
-    o.append(f'<clipPath id="{clip}"><path d="{torso}"/></clipPath>')
-    o.append(P(torso, HOOD, stroke=None))
-    o.append(f'<g clip-path="url(#{clip})">'
-             + P("M 60,170 C 80,300 74,450 86,560 L 140,560 L 140,170 Z", HOOD_SH, stroke=None)
-             + "</g>")
-    o.append(P(torso, "none"))
-    o.append(P("M -76,470 L -64,372 L 40,372 L 56,470", sw=4))
-    o.append(P("M -92,516 C -40,528 60,528 112,516", sw=4))
-    # near sleeve
-    o.append(P("M 88,200 C 124,208 140,240 142,290 L 150,474 C 136,484 114,484 104,476 "
-               "L 100,300 Z", HOOD_SH))
-    o.append(P("M 150,462 C 136,470 116,470 104,464 L 104,482 C 114,492 136,492 150,484 Z",
-               HOOD_SH, sw=4))
-    o.append(P("M 146,486 C 152,514 140,534 126,534 C 112,534 104,516 108,486 Z", SKIN))
-    # hood collar
-    o.append(P("M -56,194 C -56,168 -30,166 -16,180 L 28,180 C 46,166 74,168 78,196 "
-               "C 66,226 -44,226 -56,194 Z", HOOD_LT))
-    o.append(P("M -16,180 C -4,198 16,198 28,180", sw=4))
-    for x in (-20, 8):
-        o.append(P(f"M {x},200 C {x+1},236 {x+2},266 {x+3},292", stroke=STRING, sw=6))
-        o.append(f'<rect x="{x-1}" y="290" width="8" height="14" rx="3" fill="{SOLE}" '
-                 f'stroke="{OUT}" stroke-width="2.5"/>')
-    # head
-    head = ("M 4,0 C 44,0 68,30 66,76 C 64,108 50,130 30,142 C 14,152 -10,156 -26,150 "
-            "C -44,142 -58,118 -62,90 C -64,40 -36,0 4,0 Z")
-    hclip = uid("head")
-    o.append(f'<clipPath id="{hclip}"><path d="{head}"/></clipPath>')
-    o.append(P(head, SKIN, stroke=None))
-    o.append(f'<g clip-path="url(#{hclip})">'
-             + P("M 24,-10 C 48,40 52,110 10,170 L 100,170 L 100,-10 Z", SKIN_SH, stroke=None)
-             + "</g>")
-    o.append(P(head, "none"))
-    hair = ("M -64,86 C -72,38 -50,0 -14,-14 C 10,-24 46,-20 64,-2 C 82,18 82,62 72,100 "
-            "C 68,86 62,74 56,66 C 46,60 36,56 28,50 C 18,58 4,60 -6,52 "
-            "C -18,62 -34,60 -42,50 C -50,58 -58,66 -62,74 Z")
+def head_34():
+    head = ("M 2,0 C 38,0 60,24 60,60 C 60,90 56,108 46,122 C 38,134 20,148 -4,152 "
+            "C -22,154 -36,148 -44,138 C -50,128 -54,112 -56,96 C -58,82 -56,74 -54,64 "
+            "C -54,26 -34,0 2,0 Z")
+    shade = (P("M 18,-10 C 44,40 46,110 4,170 L 120,170 L 120,-10 Z", SKIN_SH, stroke=None)
+             + P("M -60,46 C -30,58 20,56 60,44 L 60,20 L -60,20 Z", SKIN_SH, stroke=None, extra='opacity="0.6"'))
+    o = [P(head, SKIN, stroke=None) + clipped(head, shade) + P(head, "none")]
+    hair = ("M -56,66 C -62,40 -58,14 -46,0 C -38,-18 -18,-32 6,-36 C 32,-38 56,-24 62,-2 "
+            "C 68,18 66,44 60,74 C 56,62 52,52 46,48 C 40,42 30,38 22,40 C 14,30 0,26 -12,30 "
+            "C -24,28 -36,32 -42,40 C -48,44 -52,52 -54,60 Z")
     o.append(P(hair, HAIR))
-    o.append(P("M 26,50 L 32,96 L 38,96 L 42,62 Z", HAIR, sw=3))
-    o.append(P("M 30,-16 C 50,-8 66,10 70,44 C 60,28 46,14 30,-16 Z", HAIR_SH, stroke=None))
-    o.append(P("M -6,-18 C -4,-42 20,-50 28,-38 C 16,-36 8,-30 6,-14 Z", HAIR))
-    o.append(E(48, 90, 10, 17, SKIN))
-    o.append(P("M 46,80 Q 54,90 47,100", sw=3))
-    ex = dict(look=(-3, 0))
-    o.append(P("M -52,72 Q -46,62 -34,66", stroke=HAIR, sw=7))
-    o.append(P("M -14,66 Q 2,58 18,70", stroke=HAIR, sw=8))
-    o.append(eye(-40, 89, -1, dict(ex, eye_r=(7, 11))))
-    o.append(eye(2, 89, 1, ex))
-    o.append(P("M -20,96 C -30,108 -32,113 -26,116 C -22,118 -18,117 -13,114", sw=3.5))
-    o.append(P("M -38,130 Q -28,126 -20,129 Q -12,131 -4,127", sw=4))
+    o.append(clipped(hair, P("M 26,-50 C 56,-20 68,20 64,80 L 100,80 L 100,-50 Z", HAIR_SH, stroke=None)))
+    for d in ("M -34,-10 C -22,-24 -2,-30 18,-28", "M -20,8 C -8,-6 12,-14 34,-12", "M -42,26 C -38,10 -28,0 -18,-6"):
+        o.append(P(d, stroke=HAIR_SH, sw=2.5))
+    o.append(P("M -28,-18 C -16,-28 0,-32 12,-30", stroke=HAIR_HI, sw=4))
+    o.append(P("M 4,-36 C 14,-48 30,-48 36,-38 C 28,-40 20,-38 16,-30 Z", HAIR))
+    o.append(P("M 40,72 C 52,62 62,72 60,88 C 58,102 50,110 42,104 Z", SKIN))
+    o.append(P("M 45,78 C 52,78 54,88 49,98", stroke=SKIN_DP, sw=2.5))
+    o.append(P("M 38,56 L 42,96", stroke=HAIR, sw=7))
+    o.append(P("M -48,62 Q -40,54 -26,58 Q -38,58 -48,64 Z", BROW, stroke=BROW, sw=2))
+    o.append(P("M -12,60 Q 6,52 24,58 Q 6,58 -12,64 Z", BROW, stroke=BROW, sw=2))
+    o.append(eye(-38, 82, -1, dict(look=(-3, 0))))
+    o.append(eye(6, 82, 1, dict(look=(-3, 0))))
+    o.append(P("M -12,78 C -16,92 -22,102 -26,108 C -24,114 -18,116 -12,113", sw=3))
+    o.append(P("M -2,80 C 0,92 2,100 -2,108", stroke=SKIN_SH, sw=3))
+    o.append(P("M -34,128 Q -24,130 -14,130 Q -4,130 4,127", sw=3.5))
+    o.append(P("M -24,138 Q -16,141 -8,138", stroke=LIP, sw=2.5))
+    o.append(f'<g transform="translate(-10,0) scale(0.9,1)">{sunglasses(False)}</g>')
     return "".join(o)
 
 
-# ---------- PROFILE (facing viewer-left) ----------
-def sam_profile():
-    o = []
-    # legs (near leg in front)
-    o.append(P("M -60,540 L -56,700 L -48,888 L 22,888 L 30,700 L 56,540 Z", PANTS))
-    o.append(P("M 4,560 L 14,888 L 22,888 L 30,700 L 56,540 Z", PANTS_SH, stroke=None))
-    o.append(P("M -60,540 L -56,700 L -48,888 L 22,888 L 30,700 L 56,540", sw=SW))
-    o.append(P("M -50,884 L -96,914 C -108,934 -20,946 22,936 C 26,914 22,898 20,884 Z", SHOE))
-    o.append(P("M -100,928 C -60,940 -10,942 24,934", sw=3))
-    o.append(P("M -70,904 Q -40,914 -6,904", stroke=MINT, sw=6))
-    # neck
-    o.append(P("M -20,134 L -16,198 L 32,198 L 34,130 Z", SKIN))
-    o.append(P("M -20,150 Q 6,160 34,140 L 34,180 L -18,180 Z", SKIN_SH, stroke=None))
-    # torso (side): chest left, back right, hood bunched at back
-    torso = ("M -30,184 C -56,192 -66,220 -66,260 L -64,400 C -64,450 -62,500 -66,544 "
-             "C -20,554 40,554 64,544 C 62,500 64,450 64,400 L 66,250 C 66,214 52,190 26,184 Z")
-    o.append(P(torso, HOOD))
-    o.append(P("M -66,520 C -20,530 30,530 64,520", sw=4))
-    o.append(P("M 8,176 C 40,166 76,180 80,210 C 82,236 60,246 40,236 C 30,222 20,206 8,196 Z",
-               HOOD_LT))
-    o.append(P("M -24,196 C -30,230 -30,262 -32,292", stroke=STRING, sw=6))
-    o.append('<rect x="-37" y="290" width="8" height="14" rx="3" fill="%s" stroke="%s" '
-             'stroke-width="2.5"/>' % (SOLE, OUT))
-    # arm
-    o.append(P("M -6,204 C 26,202 40,226 38,262 L 34,470 C 22,480 -4,480 -12,470 L -16,262 "
-               "C -18,230 -20,208 -6,204 Z", HOOD_SH))
-    o.append(P("M 34,458 C 22,466 -2,466 -12,460 L -12,480 C -2,490 22,490 34,480 Z", HOOD_SH, sw=4))
-    o.append(P("M 30,484 C 36,512 26,532 12,532 C -2,532 -12,514 -8,484 Z", SKIN))
-    # head
-    head = ("M 8,-2 C 48,-2 72,32 70,76 C 68,104 58,122 42,136 L 30,150 C 0,154 -30,154 -46,148 "
-            "C -54,144 -56,136 -52,130 C -58,127 -58,121 -54,119 C -58,116 -58,113 -56,111 "
-            "C -62,110 -68,108 -71,104 C -72,98 -64,90 -58,82 C -55,76 -57,70 -58,62 "
-            "C -58,30 -36,-2 8,-2 Z")
-    hclip = uid("head")
-    o.append(f'<clipPath id="{hclip}"><path d="{head}"/></clipPath>')
-    o.append(P(head, SKIN, stroke=None))
-    o.append(f'<g clip-path="url(#{hclip})">'
-             + P("M 0,120 C 20,150 50,150 80,120 L 80,170 L 0,170 Z", SKIN_SH, stroke=None)
-             + "</g>")
-    o.append(P(head, "none"))
-    hair = ("M -56,58 C -66,18 -36,-20 8,-16 C 54,-12 84,26 78,82 C 76,110 66,130 48,142 "
-            "C 42,128 38,118 36,108 C 34,96 34,84 30,72 C 18,70 4,64 -4,54 "
-            "C -18,62 -32,58 -40,52 C -46,58 -52,60 -56,58 Z")
+def head_profile():
+    head = ("M 6,0 C 42,0 64,26 62,64 C 61,90 54,110 42,124 C 34,128 26,130 20,130 "
+            "C 10,142 -12,154 -34,154 C -44,154 -50,150 -50,144 C -51,140 -50,138 -52,134 "
+            "C -56,132 -57,129 -54,126 C -57,123 -58,120 -56,117 C -57,114 -57,112 -56,110 "
+            "C -62,109 -68,107 -69,103 C -70,98 -64,90 -57,80 C -55,74 -56,68 -57,62 "
+            "C -58,26 -32,0 6,0 Z")
+    shade = (P("M -40,124 C -10,146 20,140 40,120 L 60,170 L -60,170 Z", SKIN_SH, stroke=None)
+             + P("M -60,40 C -40,50 -20,50 0,40 L 0,20 L -60,20 Z", SKIN_SH, stroke=None, extra='opacity="0.6"'))
+    o = [P(head, SKIN, stroke=None) + clipped(head, shade) + P(head, "none")]
+    hair = ("M -54,60 C -66,22 -40,-24 4,-30 C 40,-34 74,-6 76,40 C 78,80 66,112 48,126 "
+            "C 44,112 42,100 40,88 C 38,76 32,64 22,58 C 10,50 -2,44 -12,46 "
+            "C -24,44 -38,48 -46,54 Z")
     o.append(P(hair, HAIR))
-    o.append(P("M 2,58 L 6,98 L 12,98 L 14,66 Z", HAIR, sw=3))
-    o.append(P("M 40,-6 C 66,10 80,40 76,80 C 70,50 60,24 40,-6 Z", HAIR_SH, stroke=None))
-    o.append(P("M -14,-14 C -14,-38 10,-48 20,-36 C 8,-34 0,-28 -2,-12 Z", HAIR))
-    o.append(E(24, 92, 11, 17, SKIN))
-    o.append(P("M 22,82 Q 32,92 24,102", sw=3))
-    o.append(P("M -56,70 Q -48,62 -34,67", stroke=HAIR, sw=7))
-    clip = uid("eye")
-    eyep = "M -52,84 Q -44,78 -34,83 Q -40,96 -50,92 Z"
-    o.append(f'<clipPath id="{clip}"><path d="{eyep}"/></clipPath>')
-    o.append(P(eyep, "#FFFFFF", sw=3))
-    o.append(f'<g clip-path="url(#{clip})">' + E(-47, 87, 6, 7, IRIS, stroke=None)
-             + E(-48, 87, 3, 3, "#1A1410", stroke=None) + "</g>")
-    o.append(P("M -54,84 Q -44,76 -33,82", sw=4.5))
-    o.append(P("M -55,124 L -46,125", sw=3.5))
+    o.append(clipped(hair, P("M 30,-40 C 70,-10 84,40 70,130 L 120,130 L 120,-40 Z", HAIR_SH, stroke=None)))
+    for d in ("M -40,10 C -28,-12 0,-24 30,-22", "M -24,30 C -10,10 16,0 44,2", "M 30,30 C 46,40 56,60 58,90"):
+        o.append(P(d, stroke=HAIR_SH, sw=2.5))
+    o.append(P("M -34,-6 C -18,-22 4,-28 22,-26", stroke=HAIR_HI, sw=4))
+    o.append(P("M -30,-26 C -26,-46 -6,-52 4,-42 C -6,-42 -14,-36 -16,-26 Z", HAIR))
+    o.append(P("M 8,70 C 22,60 34,72 32,88 C 30,102 20,110 10,104 Z", SKIN))
+    o.append(P("M 13,76 C 22,76 24,88 18,98", stroke=SKIN_DP, sw=2.5))
+    o.append(P("M -52,60 Q -44,52 -30,56 Q -42,57 -52,62 Z", BROW, stroke=BROW, sw=2))
+    ey = "M -52,78 Q -44,72 -34,77 Q -40,88 -50,86 Z"
+    o.append(P(ey, "#FBFAF7", stroke=None)
+             + clipped(ey, E(-46, 80, 5.5, 6.5, IRIS, stroke=OUT, sw=1.5) + E(-47, 80, 2.6, 2.6, "#111", stroke=None)))
+    o.append(P("M -54,78 Q -44,70 -33,76", sw=4))
+    o.append(P("M -54,126 L -46,127", sw=3))
+    o.append(P("M -46,-14 L -20,-16 C -18,-4 -24,4 -34,4 C -44,4 -48,-4 -46,-14 Z", SHADES, sw=4))
+    o.append(P("M -20,-14 L 34,-8", stroke=SHADES, sw=4))
+    o.append(P("M -40,-10 L -32,0", stroke=SHADES_HI, sw=2.5))
     return "".join(o)
 
 
-# ---------- SHEETS ----------
-FONT = "font-family=\"Inter\""
+# ============ BODIES ============
+TORSO_F = ("M -34,186 C -62,194 -92,200 -112,208 C -128,216 -132,240 -128,262 "
+           "C -124,276 -118,284 -112,288 C -106,350 -92,420 -90,470 C -90,490 -92,506 -94,524 "
+           "C -40,534 40,534 94,524 C 92,506 90,490 90,470 C 92,420 106,350 112,288 "
+           "C 118,284 124,276 128,262 C 132,240 128,216 112,208 C 92,200 62,194 34,186 "
+           "C 22,198 -22,198 -34,186 Z")
+PELVIS_F = "M -94,500 C -96,530 -98,556 -92,592 L 0,604 L 92,592 C 98,556 96,530 94,500 Z"
+NECK_F = "M -27,124 L -31,198 L 31,198 L 27,124 Z"
 
 
-def sheet(content, title, subtitle):
+def torso_front():
+    shade = (P("M 60,170 C 84,300 70,450 84,560 L 160,560 L 160,170 Z", TEE_SH, stroke=None)
+             + P("M -100,214 C -70,206 -40,204 -20,208", stroke=TEE_HI, sw=6))
+    o = [P(TORSO_F, TEE, stroke=None), clipped(TORSO_F, shade), P(TORSO_F, "none")]
+    o.append(P("M -72,300 Q -40,318 -8,304 M 72,300 Q 40,318 8,304", stroke=TEE_SH, sw=3))
+    o.append(P("M -86,470 Q -60,480 -40,474 M 86,462 Q 66,474 46,470", stroke=TEE_SH, sw=2.5))
+    o.append(P("M -34,186 C -22,206 22,206 34,186", sw=SW))
+    o.append(P("M -28,194 C -16,208 16,208 28,194", stroke=TEE_SH, sw=3))
+    return "".join(o)
+
+
+def neck(d, shade_d):
+    return P(d, SKIN) + clipped(d, P(shade_d, SKIN_SH, stroke=None)) + P(d, "none")
+
+
+DEFAULT_POSE = dict(lu=8, lf=3, lh=3, lhand="relaxed", ru=-8, rf=-3, rh=-3, rhand="relaxed",
+                    legs=[(3, 1, 0), (-3, -1, 0)])
+
+
+def sam_front(expr="neutral", pose=None):
+    p = dict(DEFAULT_POSE, **(pose or {}))
+    o = [pants_and_legs([(-48, 566), (48, 566)], p["legs"], PELVIS_F)]
+    o.append(neck(NECK_F, "M -40,130 Q 0,170 40,130 L 40,200 L -40,200 Z"))
+    o.append(P("M -16,160 L -8,196 M 16,160 L 8,196", stroke=SKIN_DP, sw=2))
+    o.append(torso_front())
+    o.append(arm(-110, 238, p["lu"], p["lf"], p["lh"], -1, p["lhand"]))
+    o.append(arm(110, 238, p["ru"], p["rf"], p["rh"], 1, p["rhand"], watch=True))
+    o.append(head_front(expr))
+    return "".join(o)
+
+
+def sam_34():
+    o = [arm(-98, 238, 6, 2, 2, -1, "relaxed", skin=SKIN_SH)]  # far arm behind
+    o.append(pants_and_legs([(-40, 566), (40, 566)], [(4, 2, 0), (-2, -1, 0)],
+                            "M -84,500 C -86,530 -88,556 -82,592 L 0,604 L 88,592 C 94,556 92,530 90,500 Z"))
+    o.append(neck("M -26,124 L -28,198 L 32,198 L 30,124 Z", "M -40,130 Q 0,170 40,130 L 40,200 L -40,200 Z"))
+    o.append(f'<g transform="translate(6,0) scale(0.88,1)">{torso_front()}</g>')
+    o.append(arm(110, 236, -8, -3, -3, 1, "relaxed", watch=True))
+    o.append(head_34())
+    return "".join(o)
+
+
+def sam_profile(pose=None):
+    p = dict(au=0, af=6, ah=6, far=(0, 6, 6), legs=[(0, 0, 0), (0, 0, 0)])
+    p.update(pose or {})
+    torso = ("M -30,186 C -62,196 -80,230 -82,270 C -84,300 -74,330 -66,360 C -60,420 -62,470 -64,524 "
+             "C -20,534 30,534 52,524 C 54,470 56,420 60,360 C 66,320 70,270 62,236 "
+             "C 54,206 42,192 30,186 Z")
+    pelvis = "M -66,500 C -68,540 -60,570 -44,596 L 40,596 C 52,570 54,540 52,500 Z"
+    o = [arm(6, 236, *p["far"], 1, "relaxed", skin=SKIN_SH)]
+    o.append(pants_and_legs([(4, 566), (-6, 566)], p["legs"], pelvis, view="side", dark_first=True))
+    o.append(neck("M -28,140 L -30,198 L 34,198 L 34,126 Z", "M -40,140 Q 0,160 40,130 L 40,200 L -40,200 Z"))
+    o.append(P(torso, TEE, stroke=None)
+             + clipped(torso, P("M 20,170 C 40,300 30,450 40,560 L 120,560 L 120,170 Z", TEE_SH, stroke=None))
+             + P(torso, "none"))
+    o.append(P("M -30,186 C -20,196 -10,198 0,196", stroke=TEE_SH, sw=3))
+    o.append(P("M -70,290 Q -56,316 -30,316", stroke=TEE_SH, sw=3))
+    o.append(arm(-4, 236, p["au"], p["af"], p["ah"], -1, "relaxed", watch=True))
+    o.append(head_profile())
+    return "".join(o)
+
+
+# ============ SHEETS ============
+FONT = 'font-family="Inter"'
+SUB = "Paycheck to Plenty · House Style A · reference v2"
+
+
+def sheet(content, title):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">'
-            f'<rect width="1920" height="1080" fill="{BG}"/>'
-            f'<rect x="0" y="0" width="1920" height="120" fill="{MINT_BG}"/>'
-            f'<text x="70" y="78" {FONT} font-weight="900" font-size="52" fill="{OUT}">{title}</text>'
-            f'<text x="1850" y="76" {FONT} font-weight="600" font-size="26" fill="{HOOD}" '
-            f'text-anchor="end">{subtitle}</text>'
-            f'{content}</svg>')
+            f'<rect width="1920" height="1080" fill="{BG}"/><rect width="1920" height="120" fill="{MINT_BG}"/>'
+            f'<text x="70" y="78" {FONT} font-weight="900" font-size="50" fill="{OUT}">{title}</text>'
+            f'<text x="1850" y="76" {FONT} font-weight="600" font-size="25" fill="{TEE}" '
+            f'text-anchor="end">{SUB}</text>{content}</svg>')
+
+
+def label(x, y, t, size=28):
+    return (f'<text x="{x}" y="{y}" {FONT} font-weight="800" font-size="{size}" fill="{OUT}" '
+            f'text-anchor="middle" letter-spacing="3">{t}</text>')
 
 
 def turnaround():
-    figs = [("FRONT", sam_front("neutral"), 400), ("3/4 VIEW", sam_three_quarter(), 960),
-            ("PROFILE", sam_profile(), 1520)]
-    body = []
-    for label, svg, x in figs:
-        body.append(E(x, 1000, 150, 18, "#E6E0D2", stroke=None))
-        body.append(f'<g transform="translate({x},190) scale(0.86)">{svg}</g>')
-        body.append(f'<text x="{x}" y="1060" {FONT} font-weight="800" font-size="30" '
-                    f'fill="{OUT}" text-anchor="middle" letter-spacing="3">{label}</text>')
-    # height guide
-    for i in range(7):
-        y = 190 + i * 150 * 0.86
-        body.append(f'<line x1="120" x2="1800" y1="{y}" y2="{y}" stroke="#E9E3D6" '
-                    f'stroke-width="2" stroke-dasharray="8 10"/>')
-    return sheet("".join(body[::-1][:0]) + "".join(
-        b for b in body if b.startswith("<line")) + "".join(
-        b for b in body if not b.startswith("<line")),
-        "SAM — CHARACTER TURNAROUND", "Paycheck to Plenty · House Style A · reference v1")
-
-
-def bust(exname):
-    # head + shoulders, cropped by the tile
-    return body_front() + head_front(exname)
+    sc = 0.8
+    b = [f'<line x1="120" x2="1800" y1="{170 + i*153*sc}" y2="{170 + i*153*sc}" stroke="#ECE6D9" '
+         f'stroke-width="2" stroke-dasharray="8 10"/>' for i in range(8)]
+    for lab, svg, x in (("FRONT", sam_front(), 400), ("3/4 VIEW", sam_34(), 960),
+                        ("PROFILE", sam_profile(), 1520)):
+        b.append(E(x, 1018, 130, 14, "#E6E0D2", stroke=None))
+        b.append(f'<g transform="translate({x},170) scale({sc})">{svg}</g>')
+        b.append(label(x, 1066, lab))
+    return sheet("".join(b), "SAM — CHARACTER TURNAROUND")
 
 
 def expressions():
-    names = ["neutral", "worried", "happy", "sad", "angry",
-             "grumpy", "shocked", "smug", "confused", "relieved"]
-    tiles = []
-    for i, n in enumerate(names):
-        col, row = i % 5, i // 5
-        x0, y0 = 60 + col * 364, 150 + row * 460
-        clip = uid("tile")
-        tiles.append(f'<clipPath id="{clip}"><rect x="{x0}" y="{y0}" width="344" height="400" rx="28"/></clipPath>')
-        tiles.append(f'<rect x="{x0}" y="{y0}" width="344" height="400" rx="28" fill="#FFFFFF" '
-                     f'stroke="#E3DCCB" stroke-width="3"/>')
-        tiles.append(f'<g clip-path="url(#{clip})"><g transform="translate({x0+172},{y0+78}) scale(1.3)">'
-                     f'{bust(n)}</g></g>')
-        tiles.append(f'<text x="{x0+172}" y="{y0+444}" {FONT} font-weight="800" font-size="30" '
-                     f'fill="{OUT}" text-anchor="middle" letter-spacing="3">{n.upper()}</text>')
-    return sheet("".join(tiles), "SAM — EXPRESSION SHEET", "Paycheck to Plenty · House Style A · reference v1")
+    t = []
+    for i, n in enumerate(EXPR):
+        col, row = i % 6, i // 6
+        x0, y0 = 40 + col * 310, 150 + row * 460
+        c = uid("tile")
+        t.append(f'<clipPath id="{c}"><rect x="{x0}" y="{y0}" width="290" height="400" rx="26"/></clipPath>')
+        t.append(f'<rect x="{x0}" y="{y0}" width="290" height="400" rx="26" fill="#FFF" stroke="#E3DCCB" stroke-width="3"/>')
+        t.append(f'<g clip-path="url(#{c})"><g transform="translate({x0+145},{y0+82}) scale(1.22)">'
+                 f'{sam_front(n)}</g></g>')
+        t.append(label(x0 + 145, y0 + 442, "COOL (SHADES ON)" if n == "cool" else n.upper(), 24))
+    return sheet("".join(t), "SAM — EXPRESSION SHEET")
+
+
+POSES = [
+    ("WAVING", "happy", dict(ru=-125, rf=-168, rh=-176, rhand="open")),
+    ("EXPLAINING", "neutral", dict(lu=22, lf=158, lh=172, lhand="point")),
+    ("HANDS ON HIPS", "smug", dict(lu=38, lf=-48, lh=-60, ru=-38, rf=48, rh=60)),
+    ("SHRUG", "confused", dict(lu=12, lf=118, lh=135, lhand="open", ru=-12, rf=-118, rh=-135, rhand="open")),
+]
+
+
+def poses():
+    b = []
+    for i, (lab, ex, pose) in enumerate(POSES):
+        x = 210 + i * 380
+        b.append(E(x, 1004, 120, 13, "#E6E0D2", stroke=None))
+        b.append(f'<g transform="translate({x},214) scale(0.72)">{sam_front(ex, pose)}</g>')
+        b.append(label(x, 1062, lab, 24))
+    walk = dict(au=-24, af=-8, ah=-8, far=(22, 40, 40), legs=[(-22, -40, -20), (24, 4, 0)])
+    b.append(E(1720, 1004, 120, 13, "#E6E0D2", stroke=None))
+    b.append(f'<g transform="translate(1720,214) scale(0.72)">{sam_profile(walk)}</g>')
+    b.append(label(1720, 1062, "WALKING", 24))
+    return sheet("".join(b), "SAM — RIG TEST (JOINTS BEND)")
 
 
 if __name__ == "__main__":
     out = Path(__file__).resolve().parent.parent / "channel-bible" / "characters"
     out.mkdir(parents=True, exist_ok=True)
-    (out / "sam_turnaround_v1.svg").write_text(turnaround())
-    (out / "sam_expressions_v1.svg").write_text(expressions())
-    print("wrote", out)
+    for name, fn in (("sam_turnaround_v2", turnaround), ("sam_expressions_v2", expressions),
+                     ("sam_rig_poses_v2", poses)):
+        (out / f"{name}.svg").write_text(fn())
+    print("ok")
