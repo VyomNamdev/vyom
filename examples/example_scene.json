@@ -1,0 +1,36 @@
+{
+  "scenes": [
+    {
+      "id": "ep01_s03",
+      "title": "Sam shows his sister the stock certificate",
+      "layout": "single",
+      "setting": "family_living_room",
+      "setting_details": "evening, the table lamp is the main light source",
+      "framing": "medium",
+      "characters": [
+        {
+          "id": "sam",
+          "expression": "smug_confident",
+          "pose": "standing on the left, arm extended, holding a stock certificate out toward his sister"
+        },
+        {
+          "id": "lena",
+          "expression": "annoyed_skeptical",
+          "pose": "standing on the right, arms crossed tightly"
+        }
+      ],
+      "action": "Sam proudly presents his first stock certificate; his sister is not impressed.",
+      "props": [
+        "ornate cream stock certificate with a decorative brown border"
+      ],
+      "text_elements": [
+        {
+          "location": "top of the certificate",
+          "text": "STOCK"
+        }
+      ],
+      "accent": "none",
+      "notes": ""
+    }
+  ]
+}

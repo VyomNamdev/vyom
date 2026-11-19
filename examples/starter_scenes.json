@@ -1,0 +1,114 @@
+{
+  "scenes": [
+    {
+      "id": "starter_01_porch_delivery",
+      "title": "Sam sells & delivers on a neighbor's porch",
+      "setting": "front_porch",
+      "setting_details": "late afternoon golden light, a wooden crate of glass soda bottles on the porch steps",
+      "framing": "medium",
+      "characters": [
+        {"id": "sam", "expression": "happy", "pose": "standing on the porch steps at left, handing a glass soda bottle forward with one mitten hand, the other hand holding out an open palm for payment"},
+        {"id": "mr_hale_shopkeeper", "expression": "friendly", "pose": "standing in the open screen doorway at right, reaching out to take the bottle, a coin pinched in his other hand", "outfit_note": "apron stays on even at home"}
+      ],
+      "action": "Sam's first sale: he delivers a bottle of soda to a neighbor's door and gets paid a nickel.",
+      "props": ["wooden crate of 6 glass soda bottles", "a single shiny coin between the neighbor's fingers"],
+      "text_elements": [{"location": "the side of the wooden crate", "text": "5¢"}],
+      "accent": "profit_green_arrow",
+      "notes": "Place a small vivid green '+5¢' floating above the coin as the only accent."
+    },
+    {
+      "id": "starter_02_certificate_living_room",
+      "title": "Sam hands his skeptical sister a stock certificate",
+      "setting": "family_living_room",
+      "setting_details": "evening, the table lamp is the main warm light source",
+      "framing": "medium",
+      "characters": [
+        {"id": "sam", "expression": "smug_confident", "pose": "standing on the left third, one arm extended holding an ornate certificate out toward his sister, other arm relaxed at his side"},
+        {"id": "lena", "expression": "annoyed_skeptical", "pose": "standing on the right third, arms crossed tightly, body turned slightly away"}
+      ],
+      "action": "Sam proudly shows off his first stock certificate; his sister thinks it is worthless paper.",
+      "props": ["ornate cream stock certificate with a decorative brown engraved border and a signature line"],
+      "text_elements": [{"location": "the top of the certificate", "text": "STOCK"}],
+      "accent": "none"
+    },
+    {
+      "id": "starter_03_store_counter",
+      "title": "Sam buys and counts at the shop counter",
+      "setting": "general_store",
+      "framing": "over_the_shoulder",
+      "characters": [
+        {"id": "sam", "expression": "serious_determined", "pose": "on tiptoe at the counter facing camera, carefully counting a row of coins out of his small brown leather coin purse"},
+        {"id": "mr_hale_shopkeeper", "expression": "shrewd", "pose": "behind the counter, partly in the foreground from behind/three-quarter, one hand resting on the brass cash register"}
+      ],
+      "action": "Sam buys a case of goods wholesale, counting out every coin of his savings.",
+      "props": ["small brown leather coin purse with clasp", "neat row of coins on the counter", "brass cash register", "glass candy jars", "paper sacks"],
+      "text_elements": [{"location": "the chalkboard price sign behind the counter", "text": "WHOLESALE  24 for $1"}],
+      "accent": "chalk_highlight"
+    },
+    {
+      "id": "starter_04_sold_stamp",
+      "title": "Closing the deal: SOLD at $40",
+      "setting": "brokerage_office",
+      "framing": "medium",
+      "characters": [
+        {"id": "sam", "expression": "smug_confident", "pose": "dead center behind a wide dark-wood desk, pressing a wooden rubber stamp onto a certificate"},
+        {"id": "brokers_ensemble", "expression": "pleased_clapping", "pose": "three brokers on each side of Sam in fedoras and long coats, clapping politely"}
+      ],
+      "action": "Sam sells his shares for more than he paid and stamps the deal closed while brokers applaud.",
+      "props": ["wooden rubber stamp", "stock certificate on the desk", "two glass ink wells", "stacks of papers", "ticker tape machine on the left wall"],
+      "text_elements": [
+        {"location": "the top of the chalkboard", "text": "PRICE BOARD"},
+        {"location": "the center of the chalkboard in large chalk numerals", "text": "$40"},
+        {"location": "the certificate as a red rubber-stamp imprint", "text": "SOLD"}
+      ],
+      "accent": "red_sold_stamp"
+    },
+    {
+      "id": "starter_05_mentor_chalkboard",
+      "title": "Mentor explains the profit math",
+      "setting": "bank_office_chalkboard",
+      "framing": "medium",
+      "characters": [
+        {"id": "mr_vance_mentor", "expression": "approving", "pose": "standing at the chalkboard on the right, wearing round wire spectacles, pointing at the final line with a wooden pointer"},
+        {"id": "sam", "expression": "shocked_surprised", "pose": "standing on the left looking up at the board, satchel on hip, mouth open in a small 'o', star sparkles in his eyes"}
+      ],
+      "action": "Mr. Vance shows Sam how $38 a share became $40 a share across 3 shares.",
+      "props": ["wooden pointer", "chalk tray with chalk", "green banker's lamp on the mahogany desk"],
+      "text_elements": [
+        {"location": "chalkboard line 1", "text": "BUY: 3 x $38 = $114"},
+        {"location": "chalkboard line 2", "text": "SELL: 3 x $40 = $120"},
+        {"location": "chalkboard line 3, circled", "text": "PROFIT = $6"}
+      ],
+      "accent": "chalk_highlight"
+    },
+    {
+      "id": "starter_06_split_small_vs_breakout",
+      "title": "Split screen: small start vs. big breakout",
+      "layout": "split_screen",
+      "framing": "split_screen",
+      "panels": [
+        {
+          "label": "THEN — the small start",
+          "setting": "bedroom_study_desk",
+          "characters": [
+            {"id": "sam", "expression": "smug_confident", "pose": "seated at the small wooden desk, writing in a ledger with a pencil, a few short stacks of coins beside him"}
+          ],
+          "props": ["3 short stacks of coins", "open ledger notebook", "glowing oil lamp", "wall calendar"],
+          "text_elements": [{"location": "the open ledger page", "text": "$114"}],
+          "accent": "none"
+        },
+        {
+          "label": "NOW — the breakout",
+          "setting": "brokerage_office",
+          "setting_details": "same warm room seen at night, a big chalkboard chart dominates the wall",
+          "characters": [
+            {"id": "sam", "expression": "shocked_surprised", "pose": "standing in front of the chalkboard, both mitten hands raised, looking up at the chart"}
+          ],
+          "props": ["chalkboard line chart that is flat then spikes sharply up to the top-right corner", "tall stacks of coins and paper bills on a desk"],
+          "text_elements": [{"location": "the peak of the chart", "text": "$12,000"}],
+          "accent": "a single vivid profit-green (#2FA84F) chart line and upward arrow on the chalkboard"
+        }
+      ]
+    }
+  ]
+}
