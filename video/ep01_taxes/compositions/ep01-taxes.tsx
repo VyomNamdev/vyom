@@ -15,15 +15,18 @@ const TOTAL = TIMELINE.totalFrames + END_HOLD;
 
 // ------------------------------------------------------------------ timing helpers
 type LineId = (typeof TIMELINE.lines)[number]["id"];
-const LINES: Record<string, { from: number; to: number; text: string; idx: number }> = {};
-TIMELINE.lines.forEach((l, idx) => (LINES[l.id] = { from: l.from, to: l.to, text: l.text, idx }));
+type Seg = { text: string; from: number; to: number };
+const LINES: Record<string, { from: number; to: number; text: string; idx: number; segments: readonly Seg[] }> = {};
+TIMELINE.lines.forEach((l, idx) => (LINES[l.id] = { from: l.from, to: l.to, text: l.text, idx, segments: l.segments }));
 const L = (id: LineId) => LINES[id];
-// the frame a phrase is said: its share of the line's characters (Kokoro speaks at an even pace)
+// the frame a phrase is said: the phrase's own voiced segment, then its share of that segment's characters
 function cue(id: LineId, phrase: string, offset = 0) {
   const l = L(id);
-  const i = l.text.indexOf(phrase);
-  if (i < 0) throw new Error(`cue: "${phrase}" not in line ${id}`);
-  return Math.round(l.from + (i / l.text.length) * (l.to - l.from)) + offset;
+  for (const g of l.segments) {
+    const i = g.text.indexOf(phrase);
+    if (i >= 0) return Math.round(g.from + (i / g.text.length) * (g.to - g.from)) + offset;
+  }
+  throw new Error(`cue: "${phrase}" not in line ${id}`);
 }
 // a section runs from a few frames before its line to a few frames before the next
 function section(id: LineId) {

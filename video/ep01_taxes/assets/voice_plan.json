@@ -1,0 +1,78 @@
+{
+  "engine": "Chatterbox-Turbo (Resemble AI, MIT), built-in voice, local CPU",
+  "note": "Each segment is voiced on its own. [tags] are Turbo's paralinguistic tokens; gain_db shapes loudness per phrase; pause is the silence after it (s).",
+  "lines": [
+    {"id": "hook", "segments": [
+      {"say": "[happy] Your first real paycheck...", "gain_db": 0, "pause": 0.25},
+      {"say": "will be almost eight hundred dollars smaller than you think.", "gain_db": 1.5, "pause": 0.45},
+      {"say": "[chuckle] School taught you photosynthesis...", "gain_db": 0, "pause": 0.2},
+      {"say": "[sarcastic] but never this.", "gain_db": -1, "pause": 0.5},
+      {"say": "So, little bro...", "gain_db": -1.5, "pause": 0.35},
+      {"say": "[happy] let me show you where that money goes.", "gain_db": 0.5, "pause": 0.45}
+    ]},
+    {"id": "define", "segments": [
+      {"say": "[happy] Okay. Taxes are money you pay to the government...", "gain_db": 0.5, "pause": 0.2},
+      {"say": "out of what you earn,", "gain_db": 0, "pause": 0.15},
+      {"say": "and what you buy.", "gain_db": 0.5, "pause": 0.45},
+      {"say": "[narration] Quick note: this is education, not personal financial advice.", "gain_db": -3.5, "pause": 0.45}
+    ]},
+    {"id": "salary", "segments": [
+      {"say": "[happy] Say you land a job paying fifty thousand dollars a year.", "gain_db": 1.5, "pause": 0.35},
+      {"say": "That's about four thousand, one hundred sixty-six dollars a month.", "gain_db": 0.5, "pause": 0.35},
+      {"say": "[whispering] Now watch what happens.", "gain_db": -1, "pause": 0.45}
+    ]},
+    {"id": "deductions", "segments": [
+      {"say": "[narration] Federal income tax takes about three hundred thirty.", "gain_db": 0, "pause": 0.25},
+      {"say": "Social Security, two fifty-eight.", "gain_db": 0, "pause": 0.25},
+      {"say": "Medicare, sixty.", "gain_db": 0, "pause": 0.3},
+      {"say": "[sarcastic] And your state grabs around one forty.", "gain_db": 0.5, "pause": 0.45}
+    ]},
+    {"id": "takehome", "segments": [
+      {"say": "So out of four thousand, one sixty-six...", "gain_db": -1, "pause": 0.25},
+      {"say": "you actually take home about three thousand, three hundred seventy-eight.", "gain_db": 0, "pause": 0.6},
+      {"say": "[gasp] Seven hundred eighty-eight dollars... gone.", "gain_db": -3, "pause": 0.4},
+      {"say": "[angry] Every single month.", "gain_db": 2.5, "pause": 0.55}
+    ]},
+    {"id": "salestax", "segments": [
+      {"say": "[happy] And it's not just your paycheck.", "gain_db": 0.5, "pause": 0.25},
+      {"say": "Buy a twenty-dollar hoodie with eight percent sales tax...", "gain_db": 0, "pause": 0.3},
+      {"say": "and you pay twenty-one sixty at the register.", "gain_db": 1.5, "pause": 0.5}
+    ]},
+    {"id": "why", "segments": [
+      {"say": "[sarcastic] Now you're probably thinking: why would anyone agree to this?", "gain_db": 0.5, "pause": 0.55}
+    ]},
+    {"id": "services", "segments": [
+      {"say": "[narration] Because that money builds the stuff you use every single day.", "gain_db": 0, "pause": 0.3},
+      {"say": "[happy] The roads you drive on. Your school. Firefighters, hospitals, parks...", "gain_db": 1.5, "pause": 0.2},
+      {"say": "even the clean water from your tap.", "gain_db": -1.5, "pause": 0.45}
+    ]},
+    {"id": "pool", "segments": [
+      {"say": "Nobody can afford a fire truck or a highway alone.", "gain_db": -0.5, "pause": 0.35},
+      {"say": "[happy] So millions of people chip in a little...", "gain_db": 0.5, "pause": 0.3},
+      {"say": "[surprised] and together, it adds up to nearly five trillion dollars a year in federal taxes.", "gain_db": 2, "pause": 0.5}
+    ]},
+    {"id": "group", "segments": [
+      {"say": "[laugh] Think of it like a group project...", "gain_db": 0.5, "pause": 0.2},
+      {"say": "where everyone pays their share so the whole country actually works.", "gain_db": 0, "pause": 0.55}
+    ]},
+    {"id": "lifetime", "segments": [
+      {"say": "[whispering] Now here's the part that'll shock you.", "gain_db": -1, "pause": 0.4},
+      {"say": "[dramatic] At this pace, over a forty-year career...", "gain_db": 0, "pause": 0.3},
+      {"say": "you'd pay around three hundred seventy-eight thousand dollars in taxes.", "gain_db": 2.5, "pause": 0.8}
+    ]},
+    {"id": "twist", "segments": [
+      {"say": "[dramatic] Which brings up the real question.", "gain_db": -1.5, "pause": 0.85},
+      {"say": "[whispering] What happens if you just... don't pay?", "gain_db": -0.5, "pause": 0.9}
+    ]},
+    {"id": "penalty", "segments": [
+      {"say": "[fear] Say you skip a one-thousand-dollar tax bill.", "gain_db": 0, "pause": 0.25},
+      {"say": "Penalties start stacking.", "gain_db": 0.5, "pause": 0.25},
+      {"say": "Interest kicks in.", "gain_db": 1, "pause": 0.3},
+      {"say": "[fear] And every month... that number keeps climbing.", "gain_db": 1.5, "pause": 0.55}
+    ]},
+    {"id": "cliff", "segments": [
+      {"say": "[dramatic] And trust me... the penalties aren't even the scariest part.", "gain_db": -1.5, "pause": 0.5},
+      {"say": "[chuckle] That's what I'll show you in part two.", "gain_db": -0.5, "pause": 1.2}
+    ]}
+  ]
+}
